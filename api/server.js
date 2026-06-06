@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Created by Mike Hayward — github.com/Skonamonkey
 const express = require('express');
 const { getDb } = require('./db');
 

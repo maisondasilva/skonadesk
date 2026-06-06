@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Created by Mike Hayward — github.com/Skonamonkey
 const jwt = require('jsonwebtoken');
 
 const SECRET = process.env.JWT_SECRET || 'changeme';

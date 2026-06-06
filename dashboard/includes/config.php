@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Created by Mike Hayward — github.com/Skonamonkey
 define('API_BASE',       rtrim(getenv('API_URL')        ?: 'http://skonadesk-api:21114', '/'));
 define('APP_NAME',       'SkonaDesk');
 define('APP_SECRET',     getenv('APP_SECRET')           ?: 'change_this_secret');

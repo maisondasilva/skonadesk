@@ -1,4 +1,6 @@
 <?php
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Created by Mike Hayward — github.com/Skonamonkey
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
 
