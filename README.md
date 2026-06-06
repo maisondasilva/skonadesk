@@ -5,15 +5,15 @@
 > Built on the open-source [RustDesk](https://rustdesk.com) server. Works with **standard, unmodified RustDesk clients** on Windows, macOS, Linux, iOS, and Android.
 
 [![Licence: AGPL-3.0](https://img.shields.io/badge/Licence-AGPL--3.0-blue.svg)](LICENSE)
-[![GitHub Container Registry](https://img.shields.io/badge/Images-GHCR-black?logo=github)](https://github.com/orgs/Skonamonkey/packages)
+[![GitHub Container Registry](https://img.shields.io/badge/Images-GHCR-black?logo=github)](https://github.com/Skonamonkey?tab=packages)
 
 ---
 
 ## What is SkonaDesk?
 
-RustDesk is a brilliant open-source remote desktop tool — but the moment you need features like address books, device groups, or shared peer lists, you hit a wall: those all live behind the £9/user/month RustDesk Pro paywall.
+RustDesk is a brilliant open-source remote desktop tool. The OSS server handles rendezvous and relay well, but ships without an API layer — so features like address books, device groups, and shared peer lists simply don't exist unless you add them yourself or pay for [RustDesk Server Pro](https://rustdesk.com/docs/en/self-host/rustdesk-server-pro/).
 
-SkonaDesk fills that gap. It's a complete self-hosted stack that gives your team the features that actually make remote desktop management useful, running entirely on your own hardware — a VPS, a Proxmox VM, a NUC under the stairs, whatever you've got.
+SkonaDesk fills that middle ground. It's a self-hosted stack that adds the management layer on top of the OSS server — address books, groups, relay auth, and an admin dashboard — without requiring a Pro licence. It runs on your own hardware: a VPS, a Proxmox VM, a NUC under the stairs, whatever you've got.
 
 **One `docker compose up` and you have:**
 
@@ -25,7 +25,7 @@ SkonaDesk fills that gap. It's a complete self-hosted stack that gives your team
 - 📊 **Admin dashboard** — clean web UI with light/dark mode, live stats, audit log, and active session monitoring
 - 🔗 **Active sessions view** — see exactly who is connected to what, in real time
 
-No cloud. No subscription. No vendor lock-in.
+No subscription. No vendor lock-in. Your data stays on your hardware.
 
 ---
 
@@ -33,21 +33,23 @@ No cloud. No subscription. No vendor lock-in.
 
 **SkonaDesk is a great fit if you are:**
 
-- A homelab enthusiast who wants proper remote desktop management without a monthly bill
-- A small business (5–25 people) that needs address books and device grouping but can't justify enterprise pricing
-- An IT pro or sysadmin who maintains a handful of machines for clients and wants a lightweight, self-hosted solution
-- Someone already running RustDesk who's frustrated that everything useful requires Pro
+- A homelab enthusiast who wants proper remote desktop management without a recurring bill
+- A small team or small business that needs address books and device grouping but doesn't need enterprise-grade identity management or policy controls
+- An IT pro or sysadmin managing a handful of machines for clients who wants a lightweight, self-hosted solution
+- Someone already running the RustDesk OSS server who wants to add the management layer on top
 
-**You should use RustDesk Pro instead if you need:**
+**You should consider [RustDesk Server Pro](https://rustdesk.com/pricing.html) if you need:**
 
-- Corporate-grade access control (ACLs between specific peers, role-based permissions)
-- Multi-factor authentication
-- Account lockout / brute-force protection out of the box
-- SLA-backed support
-- Audit compliance features
-- A hosted solution with no infrastructure to manage
+- OIDC / LDAP / Active Directory integration
+- Two-factor authentication
+- Fine-grained access control policies (who can connect to what)
+- Multiple geographically distributed relay servers
+- Custom client generator (pre-configured installers)
+- SMTP email notifications and alarms
+- Web client self-hosting
+- Commercial support
 
-SkonaDesk is intentionally lightweight. It's not trying to compete with enterprise RustDesk Pro — it's for people who don't need that level but want something genuinely usable beyond the bare-bones OSS server.
+RustDesk Pro is also self-hosted — it's not a cloud service. It's a genuinely excellent product for teams that need those features. SkonaDesk is for the space between the bare OSS server and full Pro: small deployments that just need address books, groups, and an admin view without the overhead of a full enterprise stack.
 
 ---
 
@@ -56,16 +58,22 @@ SkonaDesk is intentionally lightweight. It's not trying to compete with enterpri
 | Feature | SkonaDesk | RustDesk OSS | RustDesk Pro |
 |---------|:---------:|:------------:|:------------:|
 | Remote desktop (relay + rendezvous) | ✅ | ✅ | ✅ |
+| Self-hosted | ✅ | ✅ | ✅ |
 | Address books (synced to client) | ✅ | ❌ | ✅ |
 | Device groups | ✅ | ❌ | ✅ |
 | User management | ✅ | ❌ | ✅ |
-| Admin dashboard | ✅ | ❌ | ✅ |
+| Admin dashboard / web console | ✅ | ❌ | ✅ |
 | Active sessions view | ✅ | ❌ | ✅ |
-| Audit log | ✅ | ❌ | ✅ |
-| Relay authentication (JWT) | ✅ | ❌ | ✅ |
+| Audit / connection log | ✅ | ❌ | ✅ |
+| Relay authentication | ✅ | ❌ | ✅ |
 | Device hardware info (CPU/RAM/OS) | ✅ | ❌ | ✅ |
-| Self-hosted | ✅ | ✅ | ❌ |
-| Cost | Free | Free | £9/user/month |
+| OIDC / LDAP / 2FA | ❌ | ❌ | ✅ |
+| Access control policies | ❌ | ❌ | ✅ |
+| Multiple relay servers (geo) | ❌ | ❌ | ✅ |
+| Custom client generator | ❌ | ❌ | ✅ |
+| SMTP / email notifications | ❌ | ❌ | ✅ |
+| Web client self-hosting | ❌ | ❌ | ✅ |
+| Licence cost | Free | Free | Paid (per user) |
 
 ---
 
