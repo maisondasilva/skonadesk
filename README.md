@@ -1,11 +1,18 @@
-# SkonaDesk
+<p align="center">
+  <img src="dashboard/assets/icon.svg" alt="SkonaDesk" width="120" />
+</p>
 
-**Self-hosted remote desktop management — pro features, zero subscription.**
+<h1 align="center">SkonaDesk</h1>
 
-> Built on the open-source [RustDesk](https://rustdesk.com) server. Works with **standard, unmodified RustDesk clients** on Windows, macOS, Linux, iOS, and Android.
+<p align="center">
+  <strong>Self-hosted remote desktop management — pro features, zero subscription.</strong><br>
+  Built on the open-source <a href="https://rustdesk.com">RustDesk</a> server. Works with <strong>standard, unmodified RustDesk clients</strong> on Windows, macOS, Linux, iOS, and Android.
+</p>
 
-[![Licence: AGPL-3.0](https://img.shields.io/badge/Licence-AGPL--3.0-blue.svg)](LICENSE)
-[![GitHub Container Registry](https://img.shields.io/badge/Images-GHCR-black?logo=github)](https://github.com/Skonamonkey?tab=packages)
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/Licence-AGPL--3.0-blue.svg" alt="Licence: AGPL-3.0"></a>
+  <a href="https://github.com/Skonamonkey?tab=packages"><img src="https://img.shields.io/badge/Images-GHCR-black?logo=github" alt="GitHub Container Registry"></a>
+</p>
 
 ---
 
@@ -74,6 +81,20 @@ RustDesk Pro is also self-hosted — it's not a cloud service. It's a genuinely 
 | SMTP / email notifications | ❌ | ❌ | ✅ |
 | Web client self-hosting | ❌ | ❌ | ✅ |
 | Licence cost | Free | Free | Paid (per user) |
+
+---
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="SkonaDesk dashboard" width="80%" />
+  <br><em>Live stats dashboard with device status, active sessions, and recent activity</em>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/devices.png" alt="Devices page" width="80%" />
+  <br><em>Device management — OS icons, client version, CPU, RAM, and WAN IP at a glance</em>
+</p>
 
 ---
 
