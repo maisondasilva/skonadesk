@@ -1,0 +1,6 @@
+.env
+data/
+*.db
+*.log
+node_modules/
+api/node_modules/

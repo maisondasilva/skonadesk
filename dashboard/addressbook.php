@@ -1,0 +1,351 @@
+<?php
+require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/api.php';
+require_once __DIR__ . '/includes/layout.php';
+
+require_login();
+$user = current_user();
+
+$flash     = '';
+$flashType = 'success';
+
+$viewUserId = $user['is_admin'] ? (int)($_GET['user_id'] ?? $user['id']) : $user['id'];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action  = $_POST['action'] ?? '';
+    $abGuid  = $_POST['ab_guid'] ?? '';
+
+    if ($action === 'add_peer' && $abGuid) {
+        $peerId = trim($_POST['peer_id'] ?? '');
+        $alias  = trim($_POST['alias']   ?? '');
+        $note   = trim($_POST['note']    ?? '');
+        if ($peerId) {
+            $resp = api_post("/ab/peer/add/$abGuid", [
+                'id'    => $peerId,
+                'alias' => $alias,
+                'note'  => $note,
+                'tags'  => [],
+            ]);
+            $flash = api_ok($resp) ? "Peer added to address book." : ("Failed: " . ($resp['error'] ?? 'unknown'));
+            if (!api_ok($resp)) $flashType = 'danger';
+        } else {
+            $flash = 'Device ID is required.';
+            $flashType = 'danger';
+        }
+
+    } elseif ($action === 'delete_peer' && $abGuid) {
+        $peerId = $_POST['peer_id'] ?? '';
+        $resp   = api_request('DELETE', "/ab/peer/$abGuid", [$peerId]);
+        $flash  = api_ok($resp) ? "Peer removed." : ("Failed: " . ($resp['error'] ?? 'unknown'));
+        if (!api_ok($resp)) $flashType = 'danger';
+
+    } elseif ($action === 'add_tag' && $abGuid) {
+        $tagName = trim($_POST['tag_name'] ?? '');
+        if ($tagName) {
+            $resp  = api_post("/ab/tag/add/$abGuid", ['name' => $tagName, 'color' => 0]);
+            $flash = api_ok($resp) ? "Tag added." : ("Failed: " . ($resp['error'] ?? 'unknown'));
+            if (!api_ok($resp)) $flashType = 'danger';
+        }
+
+    } elseif ($action === 'delete_tag' && $abGuid) {
+        $tagName = $_POST['tag_name'] ?? '';
+        $resp    = api_request('DELETE', "/ab/tag/$abGuid", [$tagName]);
+        $flash   = api_ok($resp) ? "Tag removed." : ("Failed: " . ($resp['error'] ?? 'unknown'));
+        if (!api_ok($resp)) $flashType = 'danger';
+    }
+
+    $params = [];
+    if ($user['is_admin'] && $viewUserId !== $user['id']) $params[] = "user_id=$viewUserId";
+    if ($flash) $params[] = "notice=" . urlencode($flash);
+    $qs = $params ? ('?' . implode('&', $params)) : '';
+    header("Location: /addressbook.php$qs");
+    exit;
+}
+
+$abData  = [];
+$abGuid  = '';
+$peers   = [];
+$tags    = [];
+
+if ($user['is_admin'] && $viewUserId !== $user['id']) {
+    $abData = api_get('/ab/admin', ['user_id' => $viewUserId]);
+    $abGuid = $abData['guid'] ?? '';
+    $peers  = $abData['peers'] ?? [];
+    $tags   = $abData['tags']  ?? [];
+} else {
+    $abData = api_post('/ab/personal');
+    $abGuid = $abData['guid'] ?? '';
+    if ($abGuid) {
+        $peersResp = api_get('/ab/peers', ['ab' => $abGuid, 'pageSize' => 200, 'current' => 1]);
+        $peers     = $peersResp['data'] ?? [];
+        $tagsResp  = api_get("/ab/tags/$abGuid");
+        $tags      = is_array($tagsResp) ? $tagsResp : [];
+    }
+}
+
+$userList = [];
+if ($user['is_admin']) {
+    $ur = api_get('/users', ['current' => 1, 'pageSize' => 200]);
+    $userList = $ur['data'] ?? [];
+}
+
+$allDevicesResp = api_get('/peers', ['current' => 1, 'pageSize' => 500]);
+$allDevices = $allDevicesResp['data'] ?? [];
+
+page_open('Address Book');
+?>
+
+<?php if ($flash): ?>
+<div class="alert alert-<?= $flashType ?>" style="margin:0 0 20px"><?= htmlspecialchars($flash) ?></div>
+<?php endif; ?>
+
+<div class="section-header" style="margin-bottom:20px">
+  <h2>Address Book</h2>
+
+  <?php if ($user['is_admin'] && !empty($userList)): ?>
+  <form method="GET" style="display:flex;align-items:center;gap:8px">
+    <label for="userSel" style="font-size:var(--font-sm);color:var(--text-muted);white-space:nowrap">Viewing:</label>
+    <div style="min-width:180px">
+      <select id="userSel" name="user_id" onchange="this.form.submit()">
+        <option value="<?= $user['id'] ?>"<?= $viewUserId === $user['id'] ? ' selected' : '' ?>>My Book</option>
+        <?php foreach ($userList as $u):
+            if ($u['name'] === $user['username']) continue; ?>
+        <option value="<?= $u['id'] ?>"<?= $viewUserId === (int)$u['id'] ? ' selected' : '' ?>>
+          <?= htmlspecialchars($u['display_name'] ?: $u['name']) ?>
+        </option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+  </form>
+  <?php endif; ?>
+
+  <?php if ($abGuid): ?>
+  <button class="btn btn-primary" data-modal-open="addPeerModal">
+    <svg data-feather="plus"></svg> Add Peer
+  </button>
+  <?php endif; ?>
+</div>
+
+<?php if (!$abGuid): ?>
+<div class="card">
+  <div class="empty-state">
+    <svg data-feather="book"></svg>
+    <h3>No address book yet</h3>
+    <p>This user's address book will be created when they first log in.</p>
+  </div>
+</div>
+<?php else: ?>
+
+<div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start">
+
+<div class="card" style="padding:0;overflow:hidden">
+  <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+    <svg data-feather="users" style="width:16px;height:16px;color:var(--accent)"></svg>
+    <strong style="font-size:var(--font-sm)"><?= count($peers) ?> Peer<?= count($peers) !== 1 ? 's' : '' ?></strong>
+  </div>
+
+  <?php if (empty($peers)): ?>
+  <div class="empty-state" style="padding:40px">
+    <svg data-feather="user-plus"></svg>
+    <p>No peers in this address book yet.</p>
+  </div>
+  <?php else: ?>
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Device ID</th>
+        <th>Alias</th>
+        <th>Host / User</th>
+        <th>Platform</th>
+        <th>Tags</th>
+        <th>Note</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($peers as $p):
+          $pTags = is_array($p['tags'] ?? null) ? $p['tags'] : [];
+      ?>
+      <tr>
+        <td><code style="font-size:0.7rem"><?= htmlspecialchars($p['id'] ?? '') ?></code></td>
+        <td><?= htmlspecialchars($p['alias'] ?? '') ?></td>
+        <td>
+          <?php if ($p['hostname'] ?? ''): ?>
+            <div style="font-weight:600"><?= htmlspecialchars($p['hostname']) ?></div>
+          <?php endif; ?>
+          <?php if ($p['username'] ?? ''): ?>
+            <div style="font-size:0.7rem;color:var(--text-muted)"><?= htmlspecialchars($p['username']) ?></div>
+          <?php endif; ?>
+        </td>
+        <td><?= htmlspecialchars($p['platform'] ?? '') ?></td>
+        <td>
+          <?php foreach ($pTags as $t): ?>
+            <span class="badge badge-info" style="margin:1px"><?= htmlspecialchars($t) ?></span>
+          <?php endforeach; ?>
+        </td>
+        <td style="color:var(--text-muted);font-size:0.75rem"><?= htmlspecialchars($p['note'] ?? '') ?></td>
+        <td>
+          <form method="POST" style="display:inline">
+            <input type="hidden" name="action"   value="delete_peer" />
+            <input type="hidden" name="ab_guid"  value="<?= htmlspecialchars($abGuid) ?>" />
+            <input type="hidden" name="peer_id"  value="<?= htmlspecialchars($p['id'] ?? '') ?>" />
+            <?php if ($viewUserId !== $user['id']): ?>
+            <input type="hidden" name="user_id"  value="<?= $viewUserId ?>" />
+            <?php endif; ?>
+            <button class="btn-icon danger" type="submit"
+              data-confirm="Remove <?= htmlspecialchars($p['id'] ?? 'this peer') ?> from address book?">
+              <svg data-feather="trash-2"></svg>
+            </button>
+          </form>
+        </td>
+      </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+  </div>
+  <?php endif; ?>
+</div>
+
+<div style="min-width:220px">
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px">
+        <svg data-feather="tag" style="width:16px;height:16px;color:var(--accent)"></svg>
+        <strong style="font-size:var(--font-sm)"><?= count($tags) ?> Tag<?= count($tags) !== 1 ? 's' : '' ?></strong>
+      </div>
+      <button class="btn-icon" title="Add tag" data-modal-open="addTagModal">
+        <svg data-feather="plus"></svg>
+      </button>
+    </div>
+    <?php if (empty($tags)): ?>
+    <div style="padding:20px;color:var(--text-muted);font-size:var(--font-sm);text-align:center">No tags yet</div>
+    <?php else: ?>
+    <ul style="list-style:none;margin:0;padding:8px 0">
+      <?php foreach ($tags as $tag): ?>
+      <li style="display:flex;align-items:center;justify-content:space-between;padding:6px 16px;border-bottom:1px solid var(--border)">
+        <span class="badge badge-info"><?= htmlspecialchars($tag['name'] ?? '') ?></span>
+        <form method="POST" style="display:inline">
+          <input type="hidden" name="action"   value="delete_tag" />
+          <input type="hidden" name="ab_guid"  value="<?= htmlspecialchars($abGuid) ?>" />
+          <input type="hidden" name="tag_name" value="<?= htmlspecialchars($tag['name'] ?? '') ?>" />
+          <button class="btn-icon danger" type="submit" title="Remove tag"
+            data-confirm="Remove tag &quot;<?= htmlspecialchars($tag['name'] ?? '') ?>&quot;?">
+            <svg data-feather="x"></svg>
+          </button>
+        </form>
+      </li>
+      <?php endforeach; ?>
+    </ul>
+    <?php endif; ?>
+  </div>
+</div>
+
+</div>
+<?php endif; ?>
+
+<div class="modal-backdrop" id="addPeerModal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <span class="modal-title">Add Peer to Address Book</span>
+      <button class="modal-close" data-modal-close><svg data-feather="x"></svg></button>
+    </div>
+    <form method="POST">
+      <input type="hidden" name="action"  value="add_peer" />
+      <input type="hidden" name="ab_guid" value="<?= htmlspecialchars($abGuid) ?>" />
+      <?php if ($viewUserId !== $user['id']): ?>
+      <input type="hidden" name="user_id" value="<?= $viewUserId ?>" />
+      <?php endif; ?>
+      <div class="modal-body">
+
+        <?php if (!empty($allDevices)): ?>
+        <div class="form-group" style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)">
+          <label for="devicePicker">Pick a known device</label>
+          <select id="devicePicker" onchange="abFillFromDevice(this)"
+                  style="padding:8px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--card);color:var(--text);width:100%;font-size:var(--font-sm)">
+            <option value="">— Select a device —</option>
+            <?php foreach ($allDevices as $d):
+                $did   = $d['id'] ?? '';
+                $dname = $d['info']['device_name'] ?? ($d['info']['hostname'] ?? $did);
+                $dos   = $d['info']['os'] ?? '';
+                $dusr  = $d['user_name'] ?? '';
+                $label = $dname . ($dusr ? " ($dusr)" : '') . ($dos ? ' · ' . explode(' ', $dos)[0] : '');
+            ?>
+            <option value="<?= htmlspecialchars($did) ?>"
+                    data-alias="<?= htmlspecialchars($dname) ?>"
+                    data-note="<?= htmlspecialchars($dos) ?>">
+              <?= htmlspecialchars($label) ?>
+            </option>
+            <?php endforeach; ?>
+          </select>
+          <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px">
+            Selecting a device auto-fills the fields below. You can still edit them.
+          </div>
+        </div>
+        <?php endif; ?>
+
+        <div class="form-group" style="margin-bottom:16px">
+          <label for="newPeerId">Device ID <span style="color:var(--danger)">*</span></label>
+          <input type="text" name="peer_id" id="newPeerId" required placeholder="e.g. 123456789" />
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label for="newAlias">Alias / Display Name</label>
+          <input type="text" name="alias" id="newAlias" placeholder="e.g. Office Desktop" />
+        </div>
+        <div class="form-group">
+          <label for="newNote">Note</label>
+          <input type="text" name="note" id="newNote" placeholder="Optional note" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">
+          <svg data-feather="user-plus"></svg>
+          Add Peer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function abFillFromDevice(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt || !opt.value) return;
+    document.getElementById('newPeerId').value = opt.value;
+    document.getElementById('newAlias').value  = opt.dataset.alias || '';
+    document.getElementById('newNote').value   = opt.dataset.note  || '';
+}
+</script>
+
+<div class="modal-backdrop" id="addTagModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <span class="modal-title">Add Tag</span>
+      <button class="modal-close" data-modal-close><svg data-feather="x"></svg></button>
+    </div>
+    <form method="POST">
+      <input type="hidden" name="action"  value="add_tag" />
+      <input type="hidden" name="ab_guid" value="<?= htmlspecialchars($abGuid) ?>" />
+      <?php if ($viewUserId !== $user['id']): ?>
+      <input type="hidden" name="user_id" value="<?= $viewUserId ?>" />
+      <?php endif; ?>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="newTagName">Tag Name <span style="color:var(--danger)">*</span></label>
+          <input type="text" name="tag_name" id="newTagName" required placeholder="e.g. Servers" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">
+          <svg data-feather="tag"></svg>
+          Add Tag
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<?php page_close(); ?>

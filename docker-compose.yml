@@ -1,0 +1,75 @@
+networks:
+  skonadesk:
+    external: false
+
+services:
+  hbbs:
+    container_name: skonadesk-hbbs
+    image: skonadesk-hbbs:latest
+    command: -r ${RELAY_HOST}:21117 -k _
+    ports:
+      - "21115:21115"
+      - "21116:21116"
+      - "21116:21116/udp"
+      - "21118:21118"
+    environment:
+      - RELAY_JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - ./data:/data
+    networks:
+      - skonadesk
+    restart: unless-stopped
+    depends_on:
+      - hbbr
+
+  hbbr:
+    container_name: skonadesk-hbbr
+    image: rustdesk/rustdesk-server:latest
+    command: hbbr -k _
+    ports:
+      - "21117:21117"
+      - "21119:21119"
+    volumes:
+      - ./data:/root
+    networks:
+      - skonadesk
+    restart: unless-stopped
+
+  api:
+    container_name: skonadesk-api
+    build: ./api
+    ports:
+      - "21114:21114"
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_USER=${ADMIN_USER}
+      - ADMIN_PASS=${ADMIN_PASS}
+      - DB_PATH=${DB_PATH}
+      - PORT=${PORT}
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./data:/data
+    networks:
+      - skonadesk
+    restart: unless-stopped
+    depends_on:
+      - hbbs
+
+  dashboard:
+    container_name: skonadesk-dashboard
+    build: ./dashboard
+    ports:
+      - "8080:80"
+    environment:
+      - API_URL=http://skonadesk-api:21114
+      - APP_SECRET=${APP_SECRET}
+      - DATA_PATH=/data
+      - API_PUBLIC_URL=${API_PUBLIC_URL:-}
+    volumes:
+      - ./dashboard:/var/www/html
+      - ./data:/data:ro
+    networks:
+      - skonadesk
+    restart: unless-stopped
+    depends_on:
+      - api
