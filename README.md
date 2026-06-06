@@ -91,9 +91,7 @@ The script will ask for your domain (or IP), generate secure secrets, write your
 
 ## Manual Install
 
-### Step 1 — Pull the pre-built images
-
-The `docker-compose.prod.yml` in this repo references pre-built images hosted on GitHub Container Registry. No compilation needed.
+### Step 1 — Clone the stack and configure
 
 ```bash
 git clone https://github.com/Skonamonkey/skonadesk.git /srv/skonadesk
@@ -101,6 +99,8 @@ cd /srv/skonadesk
 cp .env.example .env
 nano .env
 ```
+
+This repo contains the API, dashboard, and Docker Compose configuration. The patched `hbbs` binary is **not** compiled here — it's a pre-built image (`ghcr.io/skonamonkey/skonadesk-hbbs:latest`) that Docker pulls automatically when you start the stack in Step 3. No separate build step is needed.
 
 ### Step 2 — Configure `.env`
 
