@@ -150,8 +150,21 @@ done
 prompt "Admin password:"
 read -rs admin_pass
 echo ""
-while [ ${#admin_pass} -lt 10 ]; do
-    warn "Password must be at least 10 characters."
+while true; do
+    if [ ${#admin_pass} -lt 10 ]; then
+        warn "Password must be at least 10 characters."
+        prompt "Admin password:"
+        read -rs admin_pass
+        echo ""
+        continue
+    fi
+    prompt "Confirm password:"
+    read -rs admin_pass_confirm
+    echo ""
+    if [ "$admin_pass" = "$admin_pass_confirm" ]; then
+        break
+    fi
+    warn "Passwords do not match. Try again."
     prompt "Admin password:"
     read -rs admin_pass
     echo ""
