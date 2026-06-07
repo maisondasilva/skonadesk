@@ -24,7 +24,7 @@ services:
 
   hbbr:
     container_name: skonadesk-hbbr
-    image: rustdesk/rustdesk-server:latest
+    image: rustdesk/rustdesk-server:1.1.15
     command: hbbr -k _
     ports:
       - "21117:21117"
