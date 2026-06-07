@@ -8,10 +8,13 @@ require_once __DIR__ . '/includes/layout.php';
 
 require_login();
 
-$info   = api_get('/server-info');
-$pubKey = $info['public_key'] ?? '';
-$domain = $info['domain']     ?? '';
-$apiUrl = $domain ? 'https://' . $domain : (API_PUBLIC_URL ?: '');
+$info       = api_get('/server-info');
+$pubKey     = $info['public_key'] ?? '';
+$domain     = $info['domain']     ?? '';
+$isIp       = (bool) preg_match('/^\d+\.\d+\.\d+\.\d+$/', $domain);
+$apiScheme  = $isIp ? 'http' : 'https';
+$apiPort    = $isIp ? ':21114' : '';
+$apiUrl     = $domain ? $apiScheme . '://' . $domain . $apiPort : (API_PUBLIC_URL ?: '');
 
 page_open('Server Info');
 ?>
@@ -71,7 +74,7 @@ page_open('Server Info');
       <div class="info-row">
         <span class="info-label">API Server</span>
         <div class="info-value copy-wrap">
-          <code class="code-block" id="apiUrl">https://<?= htmlspecialchars($domain) ?></code>
+          <code class="code-block" id="apiUrl"><?= htmlspecialchars($apiUrl) ?></code>
           <button class="copy-btn" data-copy="#apiUrl" title="Copy"><svg data-feather="copy"></svg></button>
         </div>
       </div>
@@ -114,7 +117,7 @@ page_open('Server Info');
         </div>
         <p style="font-size:var(--font-sm);color:var(--text-muted)">
           Set <strong>ID/Relay Server</strong> to <code style="color:var(--color-primary)"><?= htmlspecialchars($domain ?: 'your-server') ?></code><br/>
-          Set <strong>API Server</strong> to <code style="color:var(--color-primary)">https://<?= htmlspecialchars($domain ?: 'your-server') ?></code>
+          Set <strong>API Server</strong> to <code style="color:var(--color-primary)"><?= htmlspecialchars($apiUrl ?: $apiScheme . '://your-server' . $apiPort) ?></code>
         </p>
       </div>
 

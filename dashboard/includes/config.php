@@ -9,8 +9,11 @@ define('APP_VERSION',    '1.0.0');
 
 $_apiPublic = getenv('API_PUBLIC_URL');
 $_domain    = getenv('DOMAIN') ?: '';
+$_isIp      = (bool) preg_match('/^\d+\.\d+\.\d+\.\d+$/', $_domain);
+$_scheme    = $_isIp ? 'http' : 'https';
+$_port      = $_isIp ? ':21114' : '';
 define('API_PUBLIC_URL', rtrim(
-    $_apiPublic ?: ($_domain ? 'https://' . $_domain : ''),
+    $_apiPublic ?: ($_domain ? $_scheme . '://' . $_domain . $_port : ''),
     '/'
 ));
 define('API_USE_SSL', str_starts_with(API_PUBLIC_URL, 'https://'));
