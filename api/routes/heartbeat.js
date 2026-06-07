@@ -119,11 +119,12 @@ router.post('/audit/conn', optionalAuth, (req, res) => {
     const peer = req.body?.peer;
     const db = getDb();
     if (Array.isArray(peer) && peer[0] && !action) {
+        const connType = (req.body?.type !== undefined && req.body?.type !== null) ? parseInt(req.body.type, 10) : null;
         db.prepare(`
-            UPDATE audit_log SET remote_id = ?
+            UPDATE audit_log SET remote_id = ?, conn_type = ?
             WHERE event_type = 'conn' AND peer_id = ? AND action = 'new'
               AND (conn_id = ? OR CAST(conn_id AS INTEGER) = ?)
-        `).run(String(peer[0]), id || '', conn_id, parseInt(conn_id, 10));
+        `).run(String(peer[0]), connType, id || '', conn_id, parseInt(conn_id, 10));
     } else {
         db.prepare(`
             INSERT INTO audit_log (event_type, peer_id, conn_id, user_id, remote_id, ip, action)

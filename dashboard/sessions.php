@@ -36,6 +36,20 @@ function sess_os_icon(string $os): string {
     </span>';
 }
 
+function sess_type_badge(?int $type): string {
+    switch ($type) {
+        case 1:
+            return '<span class="badge" style="font-size:0.7rem;background:rgba(99,102,241,0.15);color:#818cf8;border:1px solid rgba(99,102,241,0.3)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>File</span>';
+        case 2:
+            return '<span class="badge" style="font-size:0.7rem;background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Port Fwd</span>';
+        default:
+            return '<span class="badge" style="font-size:0.7rem;background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Remote</span>';
+    }
+}
+
 function duration_since(string $ts, DateTime $now): string {
     if (!$ts) return '—';
     try {
@@ -60,7 +74,7 @@ page_open('Active Sessions');
       <span class="dot dot-green"></span>
       <?= count($sessions) ?> active
     </span>
-    <span style="font-size:0.8rem;color:var(--text-muted)">Auto-refreshes every 15 seconds</span>
+    <span style="font-size:0.8rem;color:var(--text-muted)">Auto-refreshes every 5 seconds</span>
   </div>
   <button class="btn btn-ghost btn-sm" onclick="refreshSessions()">
     <svg data-feather="refresh-cw" style="width:14px;height:14px"></svg>
@@ -83,6 +97,7 @@ page_open('Active Sessions');
       <thead>
         <tr>
           <th style="width:80px">Status</th>
+          <th style="width:90px">Type</th>
           <th>Controlling (Caller)</th>
           <th style="text-align:center;width:40px"></th>
           <th>Target Device</th>
@@ -105,6 +120,7 @@ page_open('Active Sessions');
             $since       = $s['connected_since'] ?? '';
             $duration    = duration_since($since, $now);
             $sinceStr    = $since ? htmlspecialchars(substr($since, 0, 16)) : '—';
+            $connType    = isset($s['conn_type']) && $s['conn_type'] !== null ? (int)$s['conn_type'] : null;
         ?>
         <tr>
           <td>
@@ -112,6 +128,7 @@ page_open('Active Sessions');
               <span class="dot dot-green"></span>Live
             </span>
           </td>
+          <td><?= sess_type_badge($connType) ?></td>
           <td>
             <div style="display:flex;align-items:center;gap:6px">
               <?= sess_os_icon($callerOs) ?>
@@ -169,7 +186,7 @@ async function refreshSessions() {
 
 function scheduleRefresh() {
     clearTimeout(_refreshTimer);
-    _refreshTimer = setTimeout(refreshSessions, 15000);
+    _refreshTimer = setTimeout(refreshSessions, 5000);
 }
 
 scheduleRefresh();

@@ -362,12 +362,12 @@ router.get('/sessions', requireAuth, requireAdmin, (req, res) => {
             const auditRow = !callerDirect
                 ? (isNaN(connIdInt)
                     ? db.prepare(`
-                        SELECT remote_id, ip, created_at FROM audit_log
+                        SELECT remote_id, ip, created_at, conn_type FROM audit_log
                         WHERE event_type = 'conn' AND peer_id = ? AND action = 'new'
                         ORDER BY created_at DESC LIMIT 1
                       `).get(dev.peer_id)
                     : db.prepare(`
-                        SELECT remote_id, ip, created_at FROM audit_log
+                        SELECT remote_id, ip, created_at, conn_type FROM audit_log
                         WHERE event_type = 'conn' AND peer_id = ? AND action = 'new'
                           AND (conn_id = ? OR CAST(conn_id AS INTEGER) = ?)
                         ORDER BY created_at DESC LIMIT 1
@@ -399,6 +399,7 @@ router.get('/sessions', requireAuth, requireAdmin, (req, res) => {
                 caller_name:     caller ? (caller.device_name || caller.hostname || caller.peer_id) : '',
                 caller_os:       caller?.os || '',
                 caller_wan_ip:   connIp || caller?.wan_ip || '',
+                conn_type:       auditRow?.conn_type ?? null,
                 connected_since: auditRow?.created_at || null,
                 last_seen:       dev.last_seen,
             });

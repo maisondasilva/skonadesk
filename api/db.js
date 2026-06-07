@@ -96,6 +96,7 @@ function initSchema() {
             conn_id     TEXT,
             user_id     INTEGER,
             remote_id   TEXT,
+            conn_type   INTEGER,
             ip          TEXT,
             action      TEXT,
             note        TEXT,
@@ -122,9 +123,10 @@ function initSchema() {
     `);
 
     const migrations = [
-        "ALTER TABLE devices ADD COLUMN cpu    TEXT DEFAULT ''",
-        "ALTER TABLE devices ADD COLUMN memory TEXT DEFAULT ''",
-        "ALTER TABLE devices ADD COLUMN wan_ip TEXT DEFAULT ''",
+        "ALTER TABLE devices ADD COLUMN cpu       TEXT DEFAULT ''",
+        "ALTER TABLE devices ADD COLUMN memory    TEXT DEFAULT ''",
+        "ALTER TABLE devices ADD COLUMN wan_ip    TEXT DEFAULT ''",
+        "ALTER TABLE audit_log ADD COLUMN conn_type INTEGER",
     ];
     for (const sql of migrations) {
         try { db.exec(sql); } catch (_) {}
