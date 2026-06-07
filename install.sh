@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+exec < /dev/tty
+
 # ─── SkonaDesk Installer ─────────────────────────────────────────────────────
 
 REPO="Skonamonkey/skonadesk"
@@ -81,13 +83,13 @@ fi
 section "Installation directory"
 
 prompt "Install to [${INSTALL_DIR}]? Press Enter to confirm or type a new path:"
-read -r custom_dir < /dev/tty
+read -r custom_dir
 INSTALL_DIR="${custom_dir:-$INSTALL_DIR}"
 
 if [ -d "$INSTALL_DIR" ] && [ -f "$INSTALL_DIR/.env" ]; then
     warn "An existing installation was found at ${INSTALL_DIR}"
     prompt "Overwrite? This will NOT delete your data directory. (y/N):"
-    read -r overwrite < /dev/tty
+    read -r overwrite
     [[ "$overwrite" =~ ^[Yy]$ ]] || { echo "  Aborted."; exit 0; }
 fi
 
@@ -117,28 +119,28 @@ echo "    • A reverse proxy (e.g. Nginx Proxy Manager) for SSL on port 443"
 echo ""
 
 prompt "Your domain name (e.g. rustdesk.example.com):"
-read -r domain < /dev/tty
+read -r domain
 while [ -z "$domain" ]; do
     warn "Domain cannot be empty."
     prompt "Your domain name:"
-    read -r domain < /dev/tty
+    read -r domain
 done
 
 prompt "Admin username (do NOT use 'admin'):"
-read -r admin_user < /dev/tty
+read -r admin_user
 while [ -z "$admin_user" ] || [ "$admin_user" = "admin" ]; do
     warn "Please choose a non-obvious admin username."
     prompt "Admin username:"
-    read -r admin_user < /dev/tty
+    read -r admin_user
 done
 
 prompt "Admin password:"
-read -rs admin_pass < /dev/tty
+read -rs admin_pass
 echo ""
 while [ ${#admin_pass} -lt 10 ]; do
     warn "Password must be at least 10 characters."
     prompt "Admin password:"
-    read -rs admin_pass < /dev/tty
+    read -rs admin_pass
     echo ""
 done
 
