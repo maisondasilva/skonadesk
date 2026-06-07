@@ -116,6 +116,7 @@ router.get('/sysinfo_ver', optionalAuth, (req, res) => {
 
 router.post('/audit/conn', optionalAuth, (req, res) => {
     const { id, conn_id, uuid, peer_id, type, action, ip } = req.body || {};
+    console.log('[audit/conn] body:', JSON.stringify(req.body));
     const db = getDb();
     db.prepare(`
         INSERT INTO audit_log (event_type, peer_id, conn_id, user_id, remote_id, ip, action)
