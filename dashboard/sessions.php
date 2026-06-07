@@ -175,7 +175,7 @@ let _refreshTimer = null;
 
 async function refreshSessions() {
     try {
-        const r = await fetch('/ajax/sessions.php', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        const r = await fetch('/ajax/sessions.php?t=' + Date.now(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
         if (!r.ok) return;
         const html = await r.text();
         document.querySelector('.content').innerHTML = html;
