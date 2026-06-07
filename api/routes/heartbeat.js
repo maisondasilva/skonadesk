@@ -116,12 +116,20 @@ router.get('/sysinfo_ver', optionalAuth, (req, res) => {
 
 router.post('/audit/conn', optionalAuth, (req, res) => {
     const { id, conn_id, uuid, peer_id, type, action, ip } = req.body || {};
-    console.log('[audit/conn] body:', JSON.stringify(req.body));
+    const peer = req.body?.peer;
     const db = getDb();
-    db.prepare(`
-        INSERT INTO audit_log (event_type, peer_id, conn_id, user_id, remote_id, ip, action)
-        VALUES ('conn', ?, ?, ?, ?, ?, ?)
-    `).run(id || '', conn_id || '', req.user?.id || null, peer_id || '', ip || '', action || '');
+    if (Array.isArray(peer) && peer[0] && !action) {
+        db.prepare(`
+            UPDATE audit_log SET remote_id = ?
+            WHERE event_type = 'conn' AND peer_id = ? AND action = 'new'
+              AND (conn_id = ? OR CAST(conn_id AS INTEGER) = ?)
+        `).run(String(peer[0]), id || '', conn_id, parseInt(conn_id, 10));
+    } else {
+        db.prepare(`
+            INSERT INTO audit_log (event_type, peer_id, conn_id, user_id, remote_id, ip, action)
+            VALUES ('conn', ?, ?, ?, ?, ?, ?)
+        `).run(id || '', conn_id || '', req.user?.id || null, peer_id || '', ip || '', action || '');
+    }
     res.json({ data: 'success' });
 });
 
