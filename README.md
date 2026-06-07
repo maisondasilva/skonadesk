@@ -325,7 +325,7 @@ The stock RustDesk OSS `hbbs` binary has two behaviours that break third-party A
 
 When a RustDesk client has an active API session it calls `secure_tcp()` before sending a `PunchHoleRequest`. This waits up to 18 seconds for the server to send a `KeyExchange` message. The stock `hbbs` never initiates one — it waits for the client. Both sides wait forever → timeout → connection fails.
 
-*Fix:* After accepting a new TCP connection, the patched hbbs sends a dummy `TestNatResponse` message. The client's `secure_tcp()` receives this, falls through its catch-all branch, and returns `Ok(())`. Connection proceeds normally.
+*Fix:* The patched hbbs implements the proper two-phase `KeyExchange` handshake. On each new TCP connection the server signs its ephemeral public key with the server signing key and sends it to the client (phase 1). The client responds with its own ephemeral public key sealed against the server's key (phase 2). Both sides derive a shared symmetric key (XSalsa20-Poly1305 via libsodium) and all subsequent rendezvous traffic on that connection is encrypted. This is equivalent to the approach used in lejianwen's fork and is the correct solution to the original deadlock.
 
 **Bug 2 — "Key mismatch" on Windows clients**
 
@@ -333,7 +333,7 @@ Standard Windows RustDesk binaries read the licence key from the embedded binary
 
 *Fix:* The licence key check is skipped entirely. Authentication is provided by JWT relay auth instead.
 
-**Security note on transport encryption:** The `TestNatResponse` fix prevents the `KeyExchange` handshake from completing, meaning the TCP connection between client and `hbbs` is not transport-encrypted at the rendezvous layer. This is identical to stock OSS `hbbs` — it never supported this either. End-to-end encryption between peers is unaffected (it happens at the peer level, not the rendezvous level). If you use SSL via a reverse proxy, the client-to-proxy leg is encrypted regardless.
+**Transport encryption:** The rendezvous TCP channel between client and `hbbs` is transport-encrypted via the KeyExchange handshake described above. End-to-end encryption between peers is unaffected (it happens at the peer level independently). If you also use SSL via a reverse proxy, the client-to-proxy leg is encrypted at the TLS layer as well.
 
 ### Architecture
 
