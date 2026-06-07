@@ -346,35 +346,49 @@ router.get('/sessions', requireAuth, requireAdmin, (req, res) => {
     `).all();
 
     const sessions = [];
+    const deviceLookup = db.prepare('SELECT peer_id, device_name, hostname, os, wan_ip FROM devices WHERE peer_id = ?');
+
     for (const dev of activeDevices) {
         let connIds = [];
         try { connIds = JSON.parse(dev.active_conns) || []; } catch {}
         for (const connId of connIds) {
-            const connIdInt = parseInt(connId, 10);
-            const auditRow = isNaN(connIdInt)
-                ? db.prepare(`
-                    SELECT remote_id, ip, created_at FROM audit_log
-                    WHERE event_type = 'conn' AND peer_id = ? AND action = 'new'
-                    ORDER BY created_at DESC LIMIT 1
-                  `).get(dev.peer_id)
-                : db.prepare(`
-                    SELECT remote_id, ip, created_at FROM audit_log
-                    WHERE event_type = 'conn' AND peer_id = ? AND action = 'new'
-                      AND (conn_id = ? OR CAST(conn_id AS INTEGER) = ?)
-                    ORDER BY created_at DESC LIMIT 1
-                  `).get(dev.peer_id, connIdInt, connIdInt);
+            const connIdStr  = String(connId);
+            const connIdInt  = parseInt(connId, 10);
+
+            const callerDirect = !isNaN(connIdInt) && connIdStr !== dev.peer_id
+                ? deviceLookup.get(connIdStr)
+                : null;
+
+            const auditRow = !callerDirect
+                ? (isNaN(connIdInt)
+                    ? db.prepare(`
+                        SELECT remote_id, ip, created_at FROM audit_log
+                        WHERE event_type = 'conn' AND peer_id = ? AND action = 'new'
+                        ORDER BY created_at DESC LIMIT 1
+                      `).get(dev.peer_id)
+                    : db.prepare(`
+                        SELECT remote_id, ip, created_at FROM audit_log
+                        WHERE event_type = 'conn' AND peer_id = ? AND action = 'new'
+                          AND (conn_id = ? OR CAST(conn_id AS INTEGER) = ?)
+                        ORDER BY created_at DESC LIMIT 1
+                      `).get(dev.peer_id, connIdInt, connIdInt))
+                : null;
 
             const connIp = auditRow?.ip || '';
 
-            const callerByPeerId = auditRow?.remote_id
-                ? db.prepare('SELECT peer_id, device_name, hostname, os, wan_ip FROM devices WHERE peer_id = ?').get(auditRow.remote_id)
+            const callerByPeerId = (!callerDirect && auditRow?.remote_id && auditRow.remote_id !== dev.peer_id)
+                ? deviceLookup.get(auditRow.remote_id)
                 : null;
 
-            const callerByIp = (!callerByPeerId && connIp)
-                ? db.prepare(`SELECT peer_id, device_name, hostname, os, wan_ip FROM devices WHERE wan_ip = ? AND last_seen >= datetime('now', '-10 minutes') ORDER BY last_seen DESC LIMIT 1`).get(connIp)
+            const callerByIp = (!callerDirect && !callerByPeerId && connIp)
+                ? db.prepare(`
+                    SELECT peer_id, device_name, hostname, os, wan_ip FROM devices
+                    WHERE wan_ip = ? AND peer_id != ? AND last_seen >= datetime('now', '-10 minutes')
+                    ORDER BY last_seen DESC LIMIT 1
+                  `).get(connIp, dev.peer_id)
                 : null;
 
-            const caller = callerByPeerId || callerByIp;
+            const caller = callerDirect || callerByPeerId || callerByIp;
 
             sessions.push({
                 target_id:       dev.peer_id,
