@@ -13,28 +13,32 @@ const BRUTE_WINDOW_MS    = 15 * 60 * 1000;
 const BRUTE_LOCKOUT_MS   = 15 * 60 * 1000;
 const loginAttempts = new Map();
 
-function getBruteRecord(ip) {
+function bruteKey(ip, username) { return `${ip}::${username}`; }
+
+function getBruteRecord(ip, username) {
     const now = Date.now();
-    const rec = loginAttempts.get(ip);
+    const key = bruteKey(ip, username);
+    const rec = loginAttempts.get(key);
     if (!rec) return null;
     if (rec.lockedUntil && now < rec.lockedUntil) return rec;
-    if (now - rec.firstAttempt > BRUTE_WINDOW_MS) { loginAttempts.delete(ip); return null; }
+    if (now - rec.firstAttempt > BRUTE_WINDOW_MS) { loginAttempts.delete(key); return null; }
     return rec;
 }
 
-function recordFailure(ip) {
+function recordFailure(ip, username) {
     const now = Date.now();
-    const rec = loginAttempts.get(ip) || { count: 0, firstAttempt: now };
+    const key = bruteKey(ip, username);
+    const rec = loginAttempts.get(key) || { count: 0, firstAttempt: now };
     if (now - rec.firstAttempt > BRUTE_WINDOW_MS) { rec.count = 0; rec.firstAttempt = now; delete rec.lockedUntil; }
     rec.count++;
     if (rec.count >= BRUTE_MAX_ATTEMPTS) {
         rec.lockedUntil = now + BRUTE_LOCKOUT_MS;
-        console.log(`[brute-force] ${ip} locked out after ${rec.count} failed attempts`);
+        console.log(`[brute-force] ${ip} locked out for user "${username}" after ${rec.count} failed attempts`);
     }
-    loginAttempts.set(ip, rec);
+    loginAttempts.set(key, rec);
 }
 
-function clearFailures(ip) { loginAttempts.delete(ip); }
+function clearFailures(ip, username) { loginAttempts.delete(bruteKey(ip, username)); }
 
 router.get('/login-options', (req, res) => {
     res.json([
@@ -47,23 +51,23 @@ router.get('/login-options', (req, res) => {
 
 router.post('/login', (req, res) => {
     const ip = req.ip || '';
-    const rec = getBruteRecord(ip);
-    if (rec?.lockedUntil) {
-        const mins = Math.ceil((rec.lockedUntil - Date.now()) / 60000);
-        return res.status(429).json({ error: `Too many failed attempts. Try again in ${mins} minute(s).` });
-    }
-
     const { username, password, id, uuid, type } = req.body || {};
 
     if (!username || !password) {
         return res.json({ error: 'Username and password required' });
     }
 
+    const rec = getBruteRecord(ip, username);
+    if (rec?.lockedUntil) {
+        const mins = Math.ceil((rec.lockedUntil - Date.now()) / 60000);
+        return res.status(429).json({ error: `Too many failed attempts. Try again in ${mins} minute(s).` });
+    }
+
     const db = getDb();
     const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
 
     if (!user || !bcrypt.compareSync(password, user.password)) {
-        recordFailure(ip);
+        recordFailure(ip, username);
         return res.json({ error: 'Invalid credentials' });
     }
 
@@ -71,7 +75,7 @@ router.post('/login', (req, res) => {
         return res.json({ error: 'Account disabled' });
     }
 
-    clearFailures(ip);
+    clearFailures(ip, username);
 
     const token = signToken({
         id: user.id,

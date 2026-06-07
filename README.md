@@ -259,10 +259,22 @@ SkonaDesk is provided as-is. You are responsible for securing your own deploymen
 - [ ] Back up `./data/id_ed25519` (the server private key) — if lost, all clients need reconfiguring
 - [ ] Keep Docker images updated periodically
 
+### Brute-force protection
+
+The API enforces login rate limiting per **IP + username** combination:
+
+- **5 failed attempts** within 15 minutes triggers a 15-minute lockout for that IP/username pair
+- Successful login immediately clears the counter
+- Lockout events are logged: `docker logs skonadesk-api | grep brute-force`
+- Locked-out clients receive HTTP 429: *"Too many failed attempts. Try again in N minute(s)."*
+
+Keying on IP+username (rather than IP alone) means a misconfigured device on your LAN retrying with wrong credentials will only lock out *that username* from *that IP* — not every user across the whole network.
+
+> **Note:** The lockout state is in-memory and resets if the API container restarts. For persistent lockouts across restarts, sit a reverse proxy with its own rate limiting (e.g. Nginx Proxy Manager's built-in limits) in front.
+
 ### What SkonaDesk does not provide
 
 - **Per-peer access control** — any authenticated user can attempt to connect to any device they know the ID of. Device-level passwords set in the RustDesk client are the only per-device restriction.
-- **Account lockout / rate limiting** — put a reverse proxy with rate limiting in front for internet-facing deployments
 - **Multi-factor authentication**
 - **Session content auditing** — connections are end-to-end encrypted between peers; the server can't see what was transmitted
 
@@ -275,6 +287,19 @@ The patched `hbbs` validates a JWT token in every `PunchHoleRequest`. Clients wi
 ---
 
 ## Troubleshooting
+
+### "Too many failed attempts" / cannot log in
+
+The API's brute-force protection has locked out your IP+username combination after 5 failed login attempts. Wait 15 minutes for the lockout to expire, or restart the API container to clear it immediately:
+
+```bash
+docker compose restart api
+```
+
+To see which IPs have been locked out:
+```bash
+docker logs skonadesk-api | grep brute-force
+```
 
 ### "Key mismatch" error
 
