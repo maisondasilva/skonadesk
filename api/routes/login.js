@@ -8,6 +8,34 @@ const { signToken, requireAuth } = require('../auth');
 
 const router = express.Router();
 
+const BRUTE_MAX_ATTEMPTS = 5;
+const BRUTE_WINDOW_MS    = 15 * 60 * 1000;
+const BRUTE_LOCKOUT_MS   = 15 * 60 * 1000;
+const loginAttempts = new Map();
+
+function getBruteRecord(ip) {
+    const now = Date.now();
+    const rec = loginAttempts.get(ip);
+    if (!rec) return null;
+    if (rec.lockedUntil && now < rec.lockedUntil) return rec;
+    if (now - rec.firstAttempt > BRUTE_WINDOW_MS) { loginAttempts.delete(ip); return null; }
+    return rec;
+}
+
+function recordFailure(ip) {
+    const now = Date.now();
+    const rec = loginAttempts.get(ip) || { count: 0, firstAttempt: now };
+    if (now - rec.firstAttempt > BRUTE_WINDOW_MS) { rec.count = 0; rec.firstAttempt = now; delete rec.lockedUntil; }
+    rec.count++;
+    if (rec.count >= BRUTE_MAX_ATTEMPTS) {
+        rec.lockedUntil = now + BRUTE_LOCKOUT_MS;
+        console.log(`[brute-force] ${ip} locked out after ${rec.count} failed attempts`);
+    }
+    loginAttempts.set(ip, rec);
+}
+
+function clearFailures(ip) { loginAttempts.delete(ip); }
+
 router.get('/login-options', (req, res) => {
     res.json([
         {
@@ -18,6 +46,13 @@ router.get('/login-options', (req, res) => {
 });
 
 router.post('/login', (req, res) => {
+    const ip = req.ip || '';
+    const rec = getBruteRecord(ip);
+    if (rec?.lockedUntil) {
+        const mins = Math.ceil((rec.lockedUntil - Date.now()) / 60000);
+        return res.status(429).json({ error: `Too many failed attempts. Try again in ${mins} minute(s).` });
+    }
+
     const { username, password, id, uuid, type } = req.body || {};
 
     if (!username || !password) {
@@ -27,7 +62,8 @@ router.post('/login', (req, res) => {
     const db = getDb();
     const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
 
-    if (!user) {
+    if (!user || !bcrypt.compareSync(password, user.password)) {
+        recordFailure(ip);
         return res.json({ error: 'Invalid credentials' });
     }
 
@@ -35,9 +71,7 @@ router.post('/login', (req, res) => {
         return res.json({ error: 'Account disabled' });
     }
 
-    if (!bcrypt.compareSync(password, user.password)) {
-        return res.json({ error: 'Invalid credentials' });
-    }
+    clearFailures(ip);
 
     const token = signToken({
         id: user.id,
