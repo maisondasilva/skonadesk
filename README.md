@@ -410,6 +410,25 @@ docker load < /tmp/skonadesk-hbbs.tar.gz
 
 ---
 
+## Project Status & Maintenance
+
+SkonaDesk is a **community-maintained, spare-time project** by a solo developer. It is stable, actively used in production, and works well as-is — but this is not a full-time product with a roadmap and release schedule.
+
+**What you can expect:**
+- Security patches applied as soon as practically possible
+- Bug fixes when reported and reproducible
+- Feature requests considered and implemented when time allows
+- The `hbbr` relay is intentionally pinned to a specific RustDesk release (currently `1.1.15`) rather than `latest`, so automatic upstream changes cannot silently break your installation
+
+**What to set your expectations around:**
+- Response times on issues/PRs may vary — real life comes first
+- There is no commercial support offering
+- If it's working for you, there is no pressure to update — *"if it ain't broke, don't fix it"* is a perfectly valid strategy here
+
+If you find it useful, the best way to help the project is to open issues for bugs, submit PRs for fixes, and spread the word in homelab communities. Contributions are always welcome.
+
+---
+
 ## Credits & Licence
 
 SkonaDesk is built on the [RustDesk open-source server](https://github.com/rustdesk/rustdesk-server). The protocol, protobuf definitions, and core rendezvous/relay logic are RustDesk's work. This project adds the API and dashboard layer and patches the two bugs described above that prevent any third-party API from working with the stock client.
