@@ -129,6 +129,16 @@ else
     use_ip=false
 fi
 
+prompt "Dashboard port [8080] — use 80 for direct access without a reverse proxy, or any free port:"
+read -r dashboard_port
+dashboard_port="${dashboard_port:-8080}"
+while ! echo "$dashboard_port" | grep -qE '^[0-9]+$' || [ "$dashboard_port" -lt 1 ] || [ "$dashboard_port" -gt 65535 ]; do
+    warn "Please enter a valid port number (1–65535)."
+    prompt "Dashboard port:"
+    read -r dashboard_port
+done
+info "Dashboard will listen on port ${dashboard_port}"
+
 prompt "Admin username (do NOT use 'admin'):"
 read -r admin_user
 while [ -z "$admin_user" ] || [ "$admin_user" = "admin" ]; do
@@ -164,6 +174,7 @@ ADMIN_PASS=${admin_pass}
 
 DB_PATH=/data/skonadesk.db
 PORT=21114
+DASHBOARD_PORT=${dashboard_port}
 EOF
 
 info ".env written"
@@ -213,7 +224,7 @@ echo -e "  ${BOLD}Next steps:${NC}"
 echo ""
 if $use_ip; then
     echo "  1. No reverse proxy needed for LAN/homelab use."
-    echo "     Admin dashboard : http://${domain}:8080"
+    echo "     Admin dashboard : http://${domain}:${dashboard_port}"
     echo "     API             : http://${domain}:21114"
     echo ""
     echo "  2. Configure the RustDesk client:"
@@ -221,11 +232,11 @@ if $use_ip; then
     echo "     API Server      : http://${domain}:21114"
     echo ""
     echo "  3. Get your server's public key:"
-    echo "     http://${domain}:8080  →  Server page"
+    echo "     http://${domain}:${dashboard_port}  →  Server page"
     echo ""
     echo "  4. Log in to the admin dashboard:"
     echo "     Username: ${admin_user}"
-    echo "     URL: http://${domain}:8080"
+    echo "     URL: http://${domain}:${dashboard_port}"
 else
     echo "  1. Set up your reverse proxy (Nginx Proxy Manager recommended):"
     echo "     • ${domain}           → skonadesk-api:21114       (SSL, port 443)"
