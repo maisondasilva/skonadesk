@@ -5,7 +5,7 @@ networks:
 services:
   hbbs:
     container_name: skonadesk-hbbs
-    image: skonadesk-hbbs:latest
+    image: ghcr.io/skonamonkey/skonadesk-hbbs:latest
     command: -r ${RELAY_HOST}:21117 -k _
     ports:
       - "21115:21115"
@@ -24,7 +24,7 @@ services:
 
   hbbr:
     container_name: skonadesk-hbbr
-    image: rustdesk/rustdesk-server:latest
+    image: rustdesk/rustdesk-server:1.1.15
     command: hbbr -k _
     ports:
       - "21117:21117"
@@ -37,7 +37,7 @@ services:
 
   api:
     container_name: skonadesk-api
-    build: ./api
+    image: ghcr.io/skonamonkey/skonadesk-api:latest
     ports:
       - "21114:21114"
     environment:
@@ -57,7 +57,7 @@ services:
 
   dashboard:
     container_name: skonadesk-dashboard
-    build: ./dashboard
+    image: ghcr.io/skonamonkey/skonadesk-dashboard:latest
     ports:
       - "8080:80"
     environment:
@@ -66,7 +66,6 @@ services:
       - DATA_PATH=/data
       - API_PUBLIC_URL=${API_PUBLIC_URL:-}
     volumes:
-      - ./dashboard:/var/www/html
       - ./data:/data:ro
     networks:
       - skonadesk
