@@ -103,7 +103,7 @@ RustDesk Pro is also self-hosted — it's not a cloud service. It's a genuinely 
 If you're on a fresh Linux server with Docker installed, the interactive installer handles everything:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Skonamonkey/skonadesk/main/install.sh | sudo bash
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/Skonamonkey/skonadesk/main/install.sh)
 ```
 
 The script will ask for your domain (or IP), generate secure secrets, write your `.env`, and start the stack.

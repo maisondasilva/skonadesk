@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-exec < /dev/tty
-
 # ─── SkonaDesk Installer ─────────────────────────────────────────────────────
 
 REPO="Skonamonkey/skonadesk"
