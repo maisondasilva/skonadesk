@@ -16,6 +16,9 @@ $apiScheme  = $isIp ? 'http' : 'https';
 $apiPort    = $isIp ? ':21114' : '';
 $apiUrl     = $domain ? $apiScheme . '://' . $domain . $apiPort : (API_PUBLIC_URL ?: '');
 
+$httpHost   = $_SERVER['HTTP_HOST'] ?? '';
+$dashPort   = (int)(parse_url('http://' . $httpHost, PHP_URL_PORT) ?: ($isIp ? 8080 : 443));
+
 page_open('Server Info');
 ?>
 
@@ -281,15 +284,21 @@ page_open('Server Info');
         </tr>
       </thead>
       <tbody>
-        <?php foreach ([
-          ['21114', 'TCP',     'API Server — required for LAN / direct-IP installs (no reverse proxy)'],
-          ['21115', 'TCP',     'NAT type test'],
-          ['21116', 'TCP/UDP', 'Rendezvous (hbbs) — ID registration &amp; hole punching'],
-          ['21117', 'TCP',     'Relay (hbbr) — fallback traffic when P2P fails'],
-          ['21118', 'TCP',     'WebSocket rendezvous (browser clients)'],
-          ['21119', 'TCP',     'WebSocket relay (browser clients)'],
-          ['443',   'TCP',     'API &amp; Dashboard — only required when using Nginx Proxy Manager + domain'],
-        ] as [$port, $proto, $desc]): ?>
+        <?php
+        $ports = [
+            ['21115', 'TCP',     'NAT type test'],
+            ['21116', 'TCP/UDP', 'Rendezvous (hbbs) — ID registration &amp; hole punching'],
+            ['21117', 'TCP',     'Relay (hbbr) — fallback traffic when P2P fails'],
+            ['21118', 'TCP',     'WebSocket rendezvous (browser clients)'],
+            ['21119', 'TCP',     'WebSocket relay (browser clients)'],
+        ];
+        if ($isIp) {
+            array_unshift($ports, ['21114', 'TCP', 'API Server (direct access — no reverse proxy)']);
+            $ports[] = [(string)$dashPort, 'TCP', 'Dashboard (your configured port)'];
+        } else {
+            $ports[] = ['443', 'TCP', 'API &amp; Dashboard (via Nginx Proxy Manager)'];
+        }
+        foreach ($ports as [$port, $proto, $desc]): ?>
         <tr style="border-bottom:1px solid var(--border-color)">
           <td style="padding:6px 12px"><code><?= $port ?></code></td>
           <td style="padding:6px 12px;color:var(--text-muted)"><?= $proto ?></td>
@@ -299,8 +308,12 @@ page_open('Server Info');
       </tbody>
     </table>
     <p style="font-size:var(--font-sm);color:var(--text-muted);margin:12px 0 0">
-      All ports must be open on both your VPS firewall/security group <strong>and</strong> any upstream router or
-      hosting panel. Port 443 is handled by Nginx Proxy Manager — no direct exposure of the API container needed.
+      <?php if ($isIp): ?>
+        All ports must be reachable by clients. Open them on the server firewall and any upstream router or hosting panel.
+      <?php else: ?>
+        All RustDesk ports must be open on the VPS firewall. Port 443 is handled by Nginx Proxy Manager — the API
+        and dashboard containers do not need direct public exposure.
+      <?php endif; ?>
     </p>
   </div>
 </div>
