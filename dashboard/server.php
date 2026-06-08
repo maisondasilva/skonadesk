@@ -282,12 +282,13 @@ page_open('Server Info');
       </thead>
       <tbody>
         <?php foreach ([
+          ['21114', 'TCP',     'API Server — required for LAN / direct-IP installs (no reverse proxy)'],
           ['21115', 'TCP',     'NAT type test'],
           ['21116', 'TCP/UDP', 'Rendezvous (hbbs) — ID registration &amp; hole punching'],
           ['21117', 'TCP',     'Relay (hbbr) — fallback traffic when P2P fails'],
           ['21118', 'TCP',     'WebSocket rendezvous (browser clients)'],
           ['21119', 'TCP',     'WebSocket relay (browser clients)'],
-          ['443',   'TCP',     'API &amp; Dashboard (via Nginx Proxy Manager)'],
+          ['443',   'TCP',     'API &amp; Dashboard — only required when using Nginx Proxy Manager + domain'],
         ] as [$port, $proto, $desc]): ?>
         <tr style="border-bottom:1px solid var(--border-color)">
           <td style="padding:6px 12px"><code><?= $port ?></code></td>
