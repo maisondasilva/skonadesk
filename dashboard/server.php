@@ -153,6 +153,117 @@ page_open('Server Info');
   </div>
 </div>
 
+<?php if ($domain && $pubKey): ?>
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">
+      <svg data-feather="download"></svg>
+      Quick Client Config
+    </div>
+  </div>
+  <div class="card-body">
+    <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:20px">
+      Skip manual entry — download a ready-made config file or run the one-liner for your platform.
+      Close RustDesk before applying, then reopen it.
+    </p>
+
+    <div style="margin-bottom:20px">
+      <button class="btn btn-primary" onclick="downloadToml()" style="display:inline-flex;align-items:center;gap:6px">
+        <svg data-feather="download" style="width:14px;height:14px"></svg>
+        Download RustDesk2.toml
+      </button>
+      <span style="font-size:var(--font-sm);color:var(--text-muted);margin-left:12px">
+        Works on Windows, Linux &amp; macOS — just drop it in the right folder (shown below).
+      </span>
+    </div>
+
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border-color);margin-bottom:16px">
+      <?php foreach (['Windows','Linux','macOS'] as $i => $tab): ?>
+      <button class="qc-tab<?= $i === 0 ? ' qc-tab-active' : '' ?>"
+              onclick="showTab('<?= strtolower($tab) ?>', this)"
+              style="padding:6px 16px;font-size:var(--font-sm);background:none;border:none;border-bottom:2px solid <?= $i===0 ? 'var(--color-primary)' : 'transparent' ?>;color:<?= $i===0 ? 'var(--color-primary)' : 'var(--text-muted)' ?>;cursor:pointer;font-weight:<?= $i===0 ? '600' : '400' ?>">
+        <?= $tab ?>
+      </button>
+      <?php endforeach; ?>
+    </div>
+
+    <div id="tab-windows">
+      <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:8px">
+        Run in <strong>PowerShell</strong> (right-click → Run as Administrator not required unless RustDesk is installed system-wide):
+      </p>
+      <div class="copy-wrap" style="align-items:flex-start">
+        <code class="code-block" id="ps1cmd" style="white-space:pre-wrap;font-size:0.72rem;line-height:1.6"><?= htmlspecialchars(
+          '$cfg = "$env:APPDATA\RustDesk\config"; mkdir -Force $cfg | Out-Null' . "\n" .
+          '@"' . "\n" .
+          'rendezvous_server = \'' . $domain . ':21116\'' . "\n\n" .
+          '[options]' . "\n" .
+          'custom-rendezvous-server = \'' . $domain . '\'' . "\n" .
+          'relay-server = \'' . $domain . '\'' . "\n" .
+          'api-server = \'' . $apiUrl . '\'' . "\n" .
+          'key = \'' . $pubKey . '\'' . "\n" .
+          '"@ | Out-File -FilePath "$cfg\RustDesk2.toml" -Encoding UTF8' . "\n" .
+          'Write-Host "Config written. Restart RustDesk."'
+        ) ?></code>
+        <button class="copy-btn" data-copy="#ps1cmd" title="Copy" style="flex-shrink:0;margin-top:2px">
+          <svg data-feather="copy"></svg>
+        </button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text-muted);margin-top:8px">
+        Config file location: <code>%APPDATA%\RustDesk\config\RustDesk2.toml</code>
+      </p>
+    </div>
+
+    <div id="tab-linux" style="display:none">
+      <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:8px">
+        Run in a terminal:
+      </p>
+      <div class="copy-wrap" style="align-items:flex-start">
+        <code class="code-block" id="bashcmd" style="white-space:pre-wrap;font-size:0.72rem;line-height:1.6"><?= htmlspecialchars(
+          'mkdir -p ~/.config/rustdesk && cat > ~/.config/rustdesk/RustDesk2.toml << \'RDEOF\'' . "\n" .
+          'rendezvous_server = \'' . $domain . ':21116\'' . "\n\n" .
+          '[options]' . "\n" .
+          'custom-rendezvous-server = \'' . $domain . '\'' . "\n" .
+          'relay-server = \'' . $domain . '\'' . "\n" .
+          'api-server = \'' . $apiUrl . '\'' . "\n" .
+          'key = \'' . $pubKey . '\'' . "\n" .
+          'RDEOF'
+        ) ?></code>
+        <button class="copy-btn" data-copy="#bashcmd" title="Copy" style="flex-shrink:0;margin-top:2px">
+          <svg data-feather="copy"></svg>
+        </button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text-muted);margin-top:8px">
+        Config file location: <code>~/.config/rustdesk/RustDesk2.toml</code>
+      </p>
+    </div>
+
+    <div id="tab-macos" style="display:none">
+      <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:8px">
+        Run in Terminal:
+      </p>
+      <div class="copy-wrap" style="align-items:flex-start">
+        <code class="code-block" id="maccmd" style="white-space:pre-wrap;font-size:0.72rem;line-height:1.6"><?= htmlspecialchars(
+          'mkdir -p ~/Library/Application\ Support/RustDesk/config && cat > ~/Library/Application\ Support/RustDesk/config/RustDesk2.toml << \'RDEOF\'' . "\n" .
+          'rendezvous_server = \'' . $domain . ':21116\'' . "\n\n" .
+          '[options]' . "\n" .
+          'custom-rendezvous-server = \'' . $domain . '\'' . "\n" .
+          'relay-server = \'' . $domain . '\'' . "\n" .
+          'api-server = \'' . $apiUrl . '\'' . "\n" .
+          'key = \'' . $pubKey . '\'' . "\n" .
+          'RDEOF'
+        ) ?></code>
+        <button class="copy-btn" data-copy="#maccmd" title="Copy" style="flex-shrink:0;margin-top:2px">
+          <svg data-feather="copy"></svg>
+        </button>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text-muted);margin-top:8px">
+        Config file location: <code>~/Library/Application Support/RustDesk/config/RustDesk2.toml</code>
+      </p>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
 <div class="card">
   <div class="card-header">
     <div class="card-title">
@@ -295,5 +406,44 @@ page_open('Server Info');
     </div>
   </div>
 </div>
+
+<script>
+<?php if ($domain && $pubKey): ?>
+(function () {
+    const tomlContent = <?= json_encode(
+        "rendezvous_server = '" . $domain . ":21116'\n\n" .
+        "[options]\n" .
+        "custom-rendezvous-server = '" . $domain . "'\n" .
+        "relay-server = '" . $domain . "'\n" .
+        "api-server = '" . $apiUrl . "'\n" .
+        "key = '" . $pubKey . "'\n"
+    ) ?>;
+
+    window.downloadToml = function () {
+        const blob = new Blob([tomlContent], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'RustDesk2.toml';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    };
+
+    window.showTab = function (name, btn) {
+        ['windows','linux','macos'].forEach(function (t) {
+            const el = document.getElementById('tab-' + t);
+            if (el) el.style.display = (t === name) ? '' : 'none';
+        });
+        document.querySelectorAll('.qc-tab').forEach(function (b) {
+            b.style.borderBottomColor = 'transparent';
+            b.style.color = 'var(--text-muted)';
+            b.style.fontWeight = '400';
+        });
+        btn.style.borderBottomColor = 'var(--color-primary)';
+        btn.style.color = 'var(--color-primary)';
+        btn.style.fontWeight = '600';
+    };
+}());
+<?php endif; ?>
+</script>
 
 <?php page_close(); ?>
