@@ -12,7 +12,7 @@
     "interface_port": 8080,
     "documentation": "https://github.com/Skonamonkey/skonadesk/wiki",
     "website": "https://github.com/Skonamonkey/skonadesk",
-    "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/rustdesk.webp",
+    "logo": "https://cdn.jsdelivr.net/gh/Skonamonkey/skonadesk@main/dashboard/assets/icon.png",
     "description": "SkonaDesk is a self-hosted remote desktop management server built on RustDesk OSS. It provides address books, device groups, active session monitoring, brute-force protection, and JWT relay auth — without a RustDesk Pro licence. Designed for homelab and SME use with a single-command install.",
     "install_methods": [
         {
