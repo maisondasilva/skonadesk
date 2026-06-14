@@ -1,0 +1,49 @@
+{
+    "name": "SkonaDesk",
+    "slug": "skonadesk",
+    "categories": [
+        6
+    ],
+    "date_created": "2026-06-08",
+    "type": "ct",
+    "updateable": true,
+    "privileged": false,
+    "has_arm": false,
+    "interface_port": 8080,
+    "documentation": "https://github.com/Skonamonkey/skonadesk/wiki",
+    "website": "https://github.com/Skonamonkey/skonadesk",
+    "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/rustdesk.webp",
+    "description": "SkonaDesk is a self-hosted remote desktop management server built on RustDesk OSS. It provides address books, device groups, active session monitoring, brute-force protection, and JWT relay auth — without a RustDesk Pro licence. Designed for homelab and SME use with a single-command install.",
+    "install_methods": [
+        {
+            "type": "default",
+            "script": "ct/skonadesk.sh",
+            "config_path": "/srv/skonadesk/.env",
+            "resources": {
+                "cpu": 2,
+                "ram": 2048,
+                "hdd": 8,
+                "os": "Debian",
+                "version": "12"
+            }
+        }
+    ],
+    "default_credentials": {
+        "username": null,
+        "password": null
+    },
+    "notes": [
+        {
+            "text": "Admin credentials are set interactively during installation — you are prompted for a username and password.",
+            "type": "info"
+        },
+        {
+            "text": "Open firewall ports on the host: 21114/TCP (API), 21115-21119/TCP, and 21116/UDP. RustDesk clients will not connect without these.",
+            "type": "warning"
+        },
+        {
+            "text": "Configure RustDesk clients via the Server page of the dashboard — it provides a one-click config file download and platform-specific setup commands.",
+            "type": "info"
+        }
+    ]
+}

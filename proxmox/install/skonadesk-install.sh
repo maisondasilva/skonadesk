@@ -2,7 +2,7 @@
 
 # Copyright (c) 2021-2026 community-scripts ORG
 # Author: Mike Hayward (Skonamonkey)
-# License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
+# License: MIT | https://github.com/community-scripts/ProxmoxVED/raw/main/LICENSE
 # Source: https://github.com/Skonamonkey/skonadesk
 
 source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
@@ -13,71 +13,78 @@ setting_up_container
 network_check
 update_os
 
-msg_info "Installing dependencies"
+msg_info "Installing Dependencies"
 $STD apt-get install -y curl openssl
-msg_ok "Installed dependencies"
+msg_ok "Installed Dependencies"
 
 msg_info "Installing Docker"
-mkdir -p /etc/docker
-echo -e '{\n  "log-driver": "journald"\n}' >/etc/docker/daemon.json
+DOCKER_CONFIG_PATH='/etc/docker/daemon.json'
+mkdir -p "$(dirname "$DOCKER_CONFIG_PATH")"
+cat >"$DOCKER_CONFIG_PATH" <<'EOF'
+{
+  "log-driver": "journald"
+}
+EOF
 $STD sh <(curl -fsSL https://get.docker.com)
 msg_ok "Installed Docker"
 
 msg_info "Downloading SkonaDesk stack"
-INSTALL_DIR="/srv/skonadesk"
-mkdir -p "${INSTALL_DIR}/data"
+install_dir="/srv/skonadesk"
+mkdir -p "${install_dir}/data"
 curl -fsSL "https://raw.githubusercontent.com/Skonamonkey/skonadesk/main/docker-compose.prod.yml" \
-  -o "${INSTALL_DIR}/docker-compose.yml"
+  -o "${install_dir}/docker-compose.yml"
 msg_ok "Downloaded SkonaDesk stack"
 
-JWT_SECRET=$(openssl rand -hex 32)
-APP_SECRET=$(openssl rand -hex 32)
+jwt_secret=$(openssl rand -hex 32)
+app_secret=$(openssl rand -hex 32)
 
-read -r -p "${TAB3}Server address — domain name or IP (e.g. 192.168.1.100): " DOMAIN
-while [[ -z "$DOMAIN" ]]; do
-  read -r -p "${TAB3}Server address cannot be empty: " DOMAIN
+read -r -p "${TAB3}Server address — domain name or IP (e.g. 192.168.1.100): " domain
+while [[ -z "$domain" ]]; do
+  read -r -p "${TAB3}Server address cannot be empty: " domain
 done
 
-read -r -p "${TAB3}Dashboard port [8080]: " DASHBOARD_PORT
-DASHBOARD_PORT="${DASHBOARD_PORT:-8080}"
+read -r -p "${TAB3}Dashboard port [8080]: " dashboard_port
+dashboard_port="${dashboard_port:-8080}"
 
-read -r -p "${TAB3}Admin username (not 'admin'): " ADMIN_USER
-while [[ -z "$ADMIN_USER" || "$ADMIN_USER" == "admin" ]]; do
-  read -r -p "${TAB3}Please choose a non-obvious admin username: " ADMIN_USER
+read -r -p "${TAB3}Admin username (not 'admin'): " admin_user
+while [[ -z "$admin_user" || "$admin_user" == "admin" ]]; do
+  read -r -p "${TAB3}Please choose a non-obvious admin username: " admin_user
 done
 
-read -r -s -p "${TAB3}Admin password (min 10 characters): " ADMIN_PASS
+read -r -s -p "${TAB3}Admin password (min 10 characters): " admin_pass
 echo ""
-while [[ ${#ADMIN_PASS} -lt 10 ]]; do
-  read -r -s -p "${TAB3}Password must be at least 10 characters: " ADMIN_PASS
+while [[ ${#admin_pass} -lt 10 ]]; do
+  read -r -s -p "${TAB3}Password must be at least 10 characters: " admin_pass
   echo ""
 done
-read -r -s -p "${TAB3}Confirm password: " ADMIN_PASS_CONFIRM
+read -r -s -p "${TAB3}Confirm password: " admin_pass_confirm
 echo ""
-while [[ "$ADMIN_PASS" != "$ADMIN_PASS_CONFIRM" ]]; do
-  read -r -s -p "${TAB3}Passwords do not match. Admin password: " ADMIN_PASS
+while [[ "$admin_pass" != "$admin_pass_confirm" ]]; do
+  read -r -s -p "${TAB3}Passwords do not match. Admin password: " admin_pass
   echo ""
-  read -r -s -p "${TAB3}Confirm password: " ADMIN_PASS_CONFIRM
+  read -r -s -p "${TAB3}Confirm password: " admin_pass_confirm
   echo ""
 done
 
-cat > "${INSTALL_DIR}/.env" <<EOF
-RELAY_HOST=${DOMAIN}
-DOMAIN=${DOMAIN}
+msg_info "Writing configuration"
+cat >"${install_dir}/.env" <<EOF
+RELAY_HOST=${domain}
+DOMAIN=${domain}
 
-JWT_SECRET=${JWT_SECRET}
-APP_SECRET=${APP_SECRET}
+JWT_SECRET=${jwt_secret}
+APP_SECRET=${app_secret}
 
-ADMIN_USER=${ADMIN_USER}
-ADMIN_PASS=${ADMIN_PASS}
+ADMIN_USER=${admin_user}
+ADMIN_PASS=${admin_pass}
 
 DB_PATH=/data/skonadesk.db
 PORT=21114
-DASHBOARD_PORT=${DASHBOARD_PORT}
+DASHBOARD_PORT=${dashboard_port}
 EOF
+msg_ok "Configuration written"
 
 msg_info "Pulling Docker images and starting SkonaDesk"
-cd "${INSTALL_DIR}"
+cd "${install_dir}"
 $STD docker compose pull
 $STD docker compose up -d
 msg_ok "SkonaDesk started"
