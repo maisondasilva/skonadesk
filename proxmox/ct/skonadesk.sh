@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVED/main/misc/build.func)
-# Copyright (c) 2021-2026 community-scripts ORG
 # Author: Mike Hayward (Skonamonkey)
-# License: MIT | https://github.com/community-scripts/ProxmoxVED/raw/main/LICENSE
+# License: MIT | https://github.com/Skonamonkey/skonadesk/raw/main/LICENSE
 # Source: https://github.com/Skonamonkey/skonadesk
+
+COMMUNITY_SCRIPTS_URL="${COMMUNITY_SCRIPTS_URL:-https://raw.githubusercontent.com/Skonamonkey/skonadesk/main/proxmox}"
 
 APP="SkonaDesk"
 var_tags="${var_tags:-docker;remote-desktop}"
