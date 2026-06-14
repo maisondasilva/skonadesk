@@ -239,7 +239,24 @@ Forward these ports from your router to the machine's LAN IP:
 
 > **Security tip:** If you're not using SSL, consider keeping ports 21114 and 8080 LAN-only and only forwarding the RustDesk protocol ports (21115–21119) externally. Access the dashboard via VPN or on the LAN.
 
-### Scenario C — LAN only / VPN only
+### Scenario C — Proxmox LXC *(one-liner)*
+
+Run the following directly on your Proxmox host. It creates a Debian 12 LXC container, installs Docker, and sets up the full SkonaDesk stack interactively — prompting you for server address, dashboard port, and admin credentials.
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skonamonkey/skonadesk/main/proxmox/ct/skonadesk.sh)"
+```
+
+The installer auto-detects the container's IP as the default server address. If you plan to put it behind a reverse proxy, enter your domain at the prompt instead of accepting the IP default.
+
+Once complete, the dashboard URL and firewall port requirements are printed to the terminal.
+
+> **Updating:** Re-run the same one-liner on the Proxmox host and choose the update option, or from inside the LXC:
+> ```bash
+> cd /srv/skonadesk && docker compose pull && docker compose up -d --force-recreate
+> ```
+
+### Scenario D — LAN only / VPN only
 
 The simplest option. No port forwarding, no domain, no SSL. All clients connect to the machine's LAN IP. Perfect for an office where all machines are on the same network, or any setup where remote access goes through a VPN first.
 
