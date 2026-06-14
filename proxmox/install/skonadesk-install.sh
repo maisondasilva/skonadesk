@@ -38,7 +38,11 @@ msg_ok "Downloaded SkonaDesk stack"
 jwt_secret=$(openssl rand -hex 32)
 app_secret=$(openssl rand -hex 32)
 
-read -r -p "${TAB3}Server address — domain name or IP (e.g. 192.168.1.100): " domain
+detected_ip=$(hostname -I 2>/dev/null | awk '{print $1}')
+echo -e "${TAB3}Enter your server's IP or domain name. RustDesk clients will connect to this address."
+echo -e "${TAB3}If you plan to use a reverse proxy (e.g. Nginx Proxy Manager), enter your domain now."
+read -r -p "${TAB3}Server address [${detected_ip}]: " domain
+domain="${domain:-${detected_ip}}"
 while [[ -z "$domain" ]]; do
   read -r -p "${TAB3}Server address cannot be empty: " domain
 done

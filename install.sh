@@ -115,8 +115,10 @@ echo "  • IP     : 192.168.1.100         — direct access, no SSL required"
 echo "  Ports 21115-21119 (TCP) and 21116 (UDP) must be reachable by clients."
 echo ""
 
-prompt "Server address — domain name or IP (e.g. 192.168.1.100 or rustdesk.example.com):"
+detected_ip=$(hostname -I 2>/dev/null | awk '{print $1}')
+prompt "Server address [${detected_ip}] — domain name or IP (e.g. 192.168.1.100 or rustdesk.example.com):"
 read -r domain
+domain="${domain:-${detected_ip}}"
 while [ -z "$domain" ]; do
     warn "Address cannot be empty."
     prompt "Server address (domain or IP):"

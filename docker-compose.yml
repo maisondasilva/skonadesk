@@ -59,7 +59,7 @@ services:
     container_name: skonadesk-dashboard
     image: ghcr.io/skonamonkey/skonadesk-dashboard:latest
     ports:
-      - "8080:80"
+      - "${DASHBOARD_PORT:-8080}:80"
     environment:
       - API_URL=http://skonadesk-api:21114
       - APP_SECRET=${APP_SECRET}

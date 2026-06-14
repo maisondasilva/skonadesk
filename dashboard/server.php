@@ -340,8 +340,13 @@ page_open('Server Info');
       <div class="info-row">
         <span class="info-label">Transport</span>
         <div class="info-value">
+          <?php if ($isIp): ?>
+          <span class="badge badge-warning">HTTP</span>
+          <span style="color:var(--text-muted);margin-left:8px">API is unencrypted (direct IP). For production use, place behind a reverse proxy with TLS.</span>
+          <?php else: ?>
           <span class="badge badge-active">HTTPS</span>
           <span style="color:var(--text-muted);margin-left:8px">API protected by TLS via Nginx Proxy Manager.</span>
+          <?php endif; ?>
         </div>
       </div>
       <div class="info-row">
