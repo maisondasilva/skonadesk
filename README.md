@@ -18,7 +18,7 @@
 
 ## What is SkonaDesk?
 
-RustDesk is a brilliant open-source remote desktop tool. The OSS server handles rendezvous and relay well, but ships without an API layer — so features like address books, device groups, and shared peer lists simply don't exist unless you add them yourself or pay for [RustDesk Server Pro](https://rustdesk.com/docs/en/self-host/rustdesk-server-pro/).
+RustDesk is an open-source remote desktop tool. The OSS server handles rendezvous and relay well, but ships without an API layer — so features like address books, device groups, and shared peer lists simply don't exist unless you add them yourself or pay for [RustDesk Server Pro](https://rustdesk.com/docs/en/self-host/rustdesk-server-pro/).
 
 SkonaDesk fills that middle ground. It's a self-hosted stack that adds the management layer on top of the OSS server — address books, groups, relay auth, and an admin dashboard — without requiring a Pro licence. It runs on your own hardware: a VPS, a Proxmox VM, a NUC under the stairs, whatever you've got.
 
