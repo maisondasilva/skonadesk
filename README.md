@@ -320,9 +320,17 @@ Not every machine needs the same configuration. This table shows exactly what wo
 - **Key** controls transport encryption on the rendezvous channel only — it does not gate connections
 - **Peer-to-peer session content is always E2E encrypted** regardless of key configuration — that is a separate mechanism between the two clients directly
 
-**Practical guidance:**
-- **Machines you control remotely (callees/servers):** server address is the only strict requirement. Adding the key is recommended for encrypted rendezvous traffic.
-- **Machines you connect from (callers/workstations):** server address + API login are both required. Key is recommended.
+**Why the key and HTTPS are strongly recommended even though connections work without them:**
+
+The JWT token travels inside every `PunchHoleRequest` on the rendezvous channel. Without the key configured on the caller, that channel is plaintext — the JWT is visible on the wire. An intercepted JWT gives an attacker 7 days of relay access (the token lifetime). Without HTTPS on the API, your password and JWT are also visible at the point of login — an intercepted password gives permanent access until changed.
+
+| Channel | Without protection — attacker sees | Consequence |
+|---|---|---|
+| **API without HTTPS** | Password + JWT token | Permanent account access + 7-day relay access |
+| **Caller rendezvous without key** | JWT in `PunchHoleRequest` | 7-day relay access |
+| **Callee rendezvous without key** | Peer ID, hostname, OS, timing | Reconnaissance only — no credential risk |
+
+None of these are enforced — connections work without them. But the marginal effort to configure the key on both sides and enable HTTPS is trivial, and the protection is real.
 
 ---
 
