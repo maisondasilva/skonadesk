@@ -12,6 +12,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/Licence-AGPL--3.0-blue.svg" alt="Licence: AGPL-3.0"></a>
   <a href="https://github.com/Skonamonkey?tab=packages"><img src="https://img.shields.io/badge/Images-GHCR-black?logo=github" alt="GitHub Container Registry"></a>
+  <a href="https://buymeacoffee.com/skonamonkey"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support%20this%20project-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee"></a>
 </p>
 
 ---
