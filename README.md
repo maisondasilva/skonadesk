@@ -205,6 +205,25 @@ Add two proxy hosts in [Nginx Proxy Manager](https://nginxproxymanager.com) (or 
 | `your.domain.com` | `skonadesk-api` | `21114` | Let's Encrypt |
 | `dashboard.your.domain.com` | `skonadesk-dashboard` | `80` | Let's Encrypt |
 
+> **NPM must be on the same Docker network** to resolve `skonadesk-api` and `skonadesk-dashboard` by hostname. SkonaDesk creates a network named `skonadesk`. Add it to NPM's `docker-compose.yml`:
+>
+> ```yaml
+> networks:
+>   skonadesk:
+>     external: true
+>
+> services:
+>   app:
+>     # ... your existing NPM config ...
+>     networks:
+>       - default
+>       - skonadesk
+> ```
+>
+> Then restart NPM: `docker compose down && docker compose up -d`
+>
+> If you prefer not to modify NPM's compose file, use the SkonaDesk container's host IP and mapped ports instead (`YOUR-SERVER-IP:21114` and `YOUR-SERVER-IP:8080`) as the forward targets — NPM doesn't need to be on the same network in that case.
+
 No SSL? Skip this step — access the dashboard at `http://YOUR-IP:8080`.
 
 ### Step 5 — Configure the RustDesk client

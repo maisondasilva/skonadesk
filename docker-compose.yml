@@ -1,5 +1,6 @@
 networks:
   skonadesk:
+    name: skonadesk
     external: false
 
 services:
