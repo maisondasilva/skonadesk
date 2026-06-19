@@ -138,7 +138,7 @@ cp .env.example .env
 nano .env
 ```
 
-This repo contains the API, dashboard, and Docker Compose configuration. The patched `hbbs` binary is **not** compiled here — it's a pre-built image (`ghcr.io/skonamonkey/skonadesk-hbbs:latest`) that Docker pulls automatically when you start the stack in Step 3. No separate build step is needed.
+This repo contains the API, dashboard, and Docker Compose configuration. The patched `hbbs` binary is **not** compiled here — it's a pre-built image (`ghcr.io/skonamonkey/skonadesk-hbbs:latest`) pulled from the [skonadesk-hbbs](https://github.com/Skonamonkey/skonadesk-hbbs) repo. Docker pulls it automatically when you start the stack in Step 3. No separate build step is needed.
 
 ### Step 2 — Configure `.env`
 
@@ -464,8 +464,8 @@ skonadesk/
 Pre-built images are provided via GHCR. If you want to build from source (e.g. to audit or modify the patches):
 
 ```bash
-git clone https://github.com/Skonamonkey/rustdesk-server.git
-cd rustdesk-server
+git clone https://github.com/Skonamonkey/skonadesk-hbbs.git
+cd skonadesk-hbbs
 git submodule update --init --recursive
 docker build --no-cache -f Dockerfile.skonadesk -t skonadesk-hbbs:latest .
 ```
