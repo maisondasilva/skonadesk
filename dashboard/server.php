@@ -376,6 +376,71 @@ page_open('Server Info');
 <div class="card">
   <div class="card-header">
     <div class="card-title">
+      <svg data-feather="grid"></svg>
+      Client Configuration Matrix
+    </div>
+  </div>
+  <div class="card-body" style="font-size:var(--font-sm)">
+    <p style="color:var(--text-muted);margin:0 0 12px">
+      Not every machine needs the same configuration. Verified against the patched <code>hbbs</code> source.
+      <strong>Peer-to-peer session content is always E2E encrypted</strong> regardless — the key only affects
+      the rendezvous metadata channel.
+    </p>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:var(--font-sm)">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:center;padding:6px 8px;color:var(--text-muted);font-weight:600" colspan="3">Caller (initiating machine)</th>
+            <th style="text-align:center;padding:6px 8px;color:var(--text-muted);font-weight:600" colspan="3">Callee (machine being controlled)</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-weight:600">Result</th>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500">Server</th>
+            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500">Login</th>
+            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500">Key</th>
+            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500">Server</th>
+            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500">Login</th>
+            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500">Key</th>
+            <th style="padding:4px 8px"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php
+          $rows = [
+            ['✅','✅','✅','✅','—','✅','✅ Works — both rendezvous channels encrypted'],
+            ['✅','✅','✅','✅','—','❌','✅ Works — caller encrypted, callee plaintext rendezvous'],
+            ['✅','✅','❌','✅','—','✅','✅ Works — callee encrypted, caller plaintext rendezvous'],
+            ['✅','✅','❌','✅','—','❌','✅ Works — both rendezvous channels plaintext'],
+            ['✅','❌','✅','✅','—','✅','❌ Blocked — caller not logged in, rejected at rendezvous'],
+            ['✅','❌','❌','✅','—','✅','❌ Blocked — caller not logged in, rejected at rendezvous'],
+            ['✅','✅','✅','❌','—','—','❌ Blocked — callee not registered, appears offline'],
+            ['❌','—','—','✅','—','✅','❌ Blocked — caller cannot reach rendezvous server'],
+          ];
+          foreach ($rows as $i => $r):
+            $bg = $i % 2 === 0 ? 'background:var(--surface-alt,rgba(0,0,0,.03))' : '';
+            $ok = str_starts_with($r[6], '✅');
+          ?>
+          <tr style="<?= $bg ?>">
+            <?php for ($c = 0; $c < 6; $c++): ?>
+            <td style="text-align:center;padding:6px 8px"><?= $r[$c] ?></td>
+            <?php endfor; ?>
+            <td style="padding:6px 8px;color:<?= $ok ? 'var(--color-active,#22c55e)' : 'var(--color-danger,#ef4444)' ?>"><?= htmlspecialchars($r[6]) ?></td>
+          </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+    <p style="color:var(--text-muted);margin:12px 0 0">
+      <strong>—</strong> = not applicable / has no effect &nbsp;|&nbsp;
+      <strong>Login</strong> = logged in to SkonaDesk API via RustDesk client &nbsp;|&nbsp;
+      <strong>Key</strong> = server public key configured in RustDesk Network settings
+    </p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">
       <svg data-feather="alert-triangle"></svg>
       Troubleshooting
     </div>

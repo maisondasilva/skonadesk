@@ -299,7 +299,30 @@ Keying on IP+username (rather than IP alone) means a misconfigured device on you
 
 The patched `hbbs` validates a JWT token in every `PunchHoleRequest`. Clients without a valid login token receive a `LICENSE_MISMATCH` response before any relay traffic flows.
 
-**Important caveat:** Only the *caller* needs to be logged in. The machine being connected *to* does not need an active API session — this is intentional, so you can connect to unattended servers and machines with no logged-in user.
+### Client configuration matrix
+
+Not every machine needs the same configuration. This table shows exactly what works and why — verified against the patched `hbbs` source code.
+
+| Caller: Server | Caller: JWT | Caller: Key | Callee: Server | Callee: JWT | Callee: Key | Result |
+|:---:|:---:|:---:|:---:|:---:|:---:|---|
+| ✅ | ✅ | ✅ | ✅ | ➖ | ✅ | ✅ Works — both rendezvous channels encrypted |
+| ✅ | ✅ | ✅ | ✅ | ➖ | ❌ | ✅ Works — caller encrypted, callee plaintext rendezvous |
+| ✅ | ✅ | ❌ | ✅ | ➖ | ✅ | ✅ Works — callee encrypted, caller plaintext rendezvous |
+| ✅ | ✅ | ❌ | ✅ | ➖ | ❌ | ✅ Works — both rendezvous channels plaintext |
+| ✅ | ❌ | ✅ | ✅ | ➖ | ✅ | ❌ **Blocked** — caller has no JWT, rejected at rendezvous |
+| ✅ | ❌ | ❌ | ✅ | ➖ | ✅ | ❌ **Blocked** — caller has no JWT, rejected at rendezvous |
+| ✅ | ✅ | ✅ | ❌ | ➖ | ➖ | ❌ **Blocked** — callee not registered, appears offline |
+| ❌ | ➖ | ➖ | ✅ | ➖ | ✅ | ❌ **Blocked** — caller can't reach rendezvous server |
+
+**Key:**
+- **➖** = not applicable / has no effect on the outcome
+- **Callee JWT** is always ➖ — the callee (machine being connected *to*) never needs to be logged in
+- **Key** controls transport encryption on the rendezvous channel only — it does not gate connections
+- **Peer-to-peer session content is always E2E encrypted** regardless of key configuration — that is a separate mechanism between the two clients directly
+
+**Practical guidance:**
+- **Machines you control remotely (callees/servers):** server address is the only strict requirement. Adding the key is recommended for encrypted rendezvous traffic.
+- **Machines you connect from (callers/workstations):** server address + API login are both required. Key is recommended.
 
 ---
 
