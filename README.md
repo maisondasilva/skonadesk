@@ -511,3 +511,5 @@ RustDesk is © RustDesk Ltd and contributors, licensed under AGPL-3.0.
 SkonaDesk is © Skonamonkey and contributors, licensed under [AGPL-3.0](LICENSE).
 
 If SkonaDesk saves you money, consider [supporting the RustDesk project](https://github.com/sponsors/rustdesk) — they built the foundation this runs on.
+
+If SkonaDesk has been useful to you, you can also [buy me a coffee](https://buymeacoffee.com/skonamonkey) — it's appreciated but never expected.
