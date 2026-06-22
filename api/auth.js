@@ -3,7 +3,7 @@
 const jwt = require('jsonwebtoken');
 
 const SECRET = process.env.JWT_SECRET || 'changeme';
-const EXPIRY = '7d';
+const EXPIRY = process.env.TOKEN_EXPIRY || '365d';
 
 function signToken(payload) {
     return jwt.sign(payload, SECRET, { expiresIn: EXPIRY });

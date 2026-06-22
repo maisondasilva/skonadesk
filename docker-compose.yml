@@ -43,6 +43,7 @@ services:
       - "21114:21114"
     environment:
       - JWT_SECRET=${JWT_SECRET}
+      - TOKEN_EXPIRY=${TOKEN_EXPIRY:-365d}
       - ADMIN_USER=${ADMIN_USER}
       - ADMIN_PASS=${ADMIN_PASS}
       - DB_PATH=${DB_PATH}
