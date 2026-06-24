@@ -106,6 +106,8 @@ info ".env.example downloaded"
 
 # ─── Configuration ────────────────────────────────────────────────────────────
 
+exec < /dev/tty
+
 section "Configuration"
 
 echo ""
