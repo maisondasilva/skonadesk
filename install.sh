@@ -3,6 +3,19 @@ set -euo pipefail
 
 # ─── SkonaDesk Installer ─────────────────────────────────────────────────────
 
+if [ ! -t 0 ]; then
+    echo ""
+    echo "  ERROR: This installer requires an interactive terminal."
+    echo "  Running via 'curl | bash' pipes stdin away from the terminal."
+    echo ""
+    echo "  Please run it like this instead:"
+    echo ""
+    echo "    curl -fsSL https://raw.githubusercontent.com/Skonamonkey/skonadesk/main/install.sh -o /tmp/skonadesk-install.sh"
+    echo "    bash /tmp/skonadesk-install.sh"
+    echo ""
+    exit 1
+fi
+
 REPO="Skonamonkey/skonadesk"
 INSTALL_DIR="/srv/skonadesk"
 COMPOSE_URL="https://raw.githubusercontent.com/${REPO}/main/docker-compose.prod.yml"
@@ -105,8 +118,6 @@ curl -fsSL "$ENV_EXAMPLE_URL" -o "$INSTALL_DIR/.env.example"
 info ".env.example downloaded"
 
 # ─── Configuration ────────────────────────────────────────────────────────────
-
-exec < /dev/tty
 
 section "Configuration"
 
