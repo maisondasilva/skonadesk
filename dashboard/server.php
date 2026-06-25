@@ -14,7 +14,7 @@ $domain     = $info['domain']     ?? '';
 $isIp       = (bool) preg_match('/^\d+\.\d+\.\d+\.\d+$/', $domain);
 $apiScheme  = $isIp ? 'http' : 'https';
 $apiPort    = $isIp ? ':21114' : '';
-$apiUrl     = $domain ? $apiScheme . '://' . $domain . $apiPort : (API_PUBLIC_URL ?: '');
+$apiUrl     = API_PUBLIC_URL ?: ($domain ? $apiScheme . '://' . $domain . $apiPort : ''); // API_PUBLIC_URL takes priority — bug fix, thanks devastgh (github.com/devastgh)
 
 $httpHost   = $_SERVER['HTTP_HOST'] ?? '';
 $dashPort   = (int)(parse_url('http://' . $httpHost, PHP_URL_PORT) ?: ($isIp ? 8080 : 443));
