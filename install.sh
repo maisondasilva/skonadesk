@@ -190,12 +190,21 @@ app_secret=$(gen_secret)
 info "JWT secret generated"
 info "App secret generated"
 
+if $use_ip; then
+    api_public_url="http://${domain}:21114"
+else
+    api_public_url="https://${domain}"
+fi
+
 cat > "$INSTALL_DIR/.env" <<EOF
 RELAY_HOST=${domain}
 DOMAIN=${domain}
+API_PUBLIC_URL=${api_public_url}
 
 JWT_SECRET=${jwt_secret}
 APP_SECRET=${app_secret}
+
+TOKEN_EXPIRY=365d
 
 ADMIN_USER=${admin_user}
 ADMIN_PASS=${admin_pass}
