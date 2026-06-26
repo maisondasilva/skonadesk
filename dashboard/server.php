@@ -291,14 +291,29 @@ page_open('Server Info');
       No manual configuration required for your users.
     </p>
     <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:12px">
-      Rename the downloaded <code>.exe</code> to:
+      Rename the downloaded installer to match your platform:
     </p>
-    <div class="copy-wrap" style="margin-bottom:16px">
-      <code class="code-block" id="cfgFilename">rustdesk-<?= htmlspecialchars($cfgString) ?>.exe</code>
-      <button class="copy-btn" data-copy="#cfgFilename" title="Copy filename"><svg data-feather="copy"></svg></button>
+    <div style="display:grid;gap:8px;margin-bottom:16px">
+      <div>
+        <span style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:4px">Windows (.exe)</span>
+        <div class="copy-wrap">
+          <code class="code-block" id="cfgFilenameWin">rustdesk-<?= htmlspecialchars($cfgString) ?>.exe</code>
+          <button class="copy-btn" data-copy="#cfgFilenameWin" title="Copy"><svg data-feather="copy"></svg></button>
+        </div>
+      </div>
+      <div>
+        <span style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:4px">Linux (.AppImage)</span>
+        <div class="copy-wrap">
+          <code class="code-block" id="cfgFilenameLinux">rustdesk-<?= htmlspecialchars($cfgString) ?>.AppImage</code>
+          <button class="copy-btn" data-copy="#cfgFilenameLinux" title="Copy"><svg data-feather="copy"></svg></button>
+        </div>
+      </div>
+      <div>
+        <span style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:4px">macOS — use the import string below instead (app bundle renaming is unreliable)</span>
+      </div>
     </div>
     <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:4px">
-      Or paste just the config string into <strong>RustDesk → Network → ID/Relay Server → Import</strong>:
+      Universal: paste the config string into <strong>RustDesk → Network → ID/Relay Server → Import</strong> on any platform:
     </p>
     <div class="copy-wrap">
       <code class="code-block" id="cfgString"><?= htmlspecialchars($cfgString) ?></code>
