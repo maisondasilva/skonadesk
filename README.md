@@ -517,6 +517,7 @@ SkonaDesk is a **community-maintained, spare-time project** by a solo developer.
 - Response times on issues/PRs may vary — real life comes first
 - There is no commercial support offering
 - If it's working for you, there is no pressure to update — *"if it ain't broke, don't fix it"* is a perfectly valid strategy here
+- **ARM64 (`linux/arm64`) images are published** but are community best-effort — I don't have ARM hardware to test on, so ARM-specific issues may take longer to diagnose or may need community help to reproduce
 
 If you find it useful, the best way to help the project is to open issues for bugs, submit PRs for fixes, and spread the word in homelab communities. Contributions are always welcome.
 
