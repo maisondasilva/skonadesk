@@ -120,11 +120,13 @@ router.post('/audit/conn', optionalAuth, (req, res) => {
     const db = getDb();
     if (Array.isArray(peer) && peer[0] && !action) {
         const connType = (req.body?.type !== undefined && req.body?.type !== null) ? parseInt(req.body.type, 10) : null;
+        const initiatorDevice = db.prepare('SELECT user_id FROM devices WHERE peer_id = ?').get(String(peer[0]));
+        const initiatorUserId = req.user?.id || initiatorDevice?.user_id || null;
         db.prepare(`
-            UPDATE audit_log SET remote_id = ?, conn_type = ?
+            UPDATE audit_log SET remote_id = ?, conn_type = ?, user_id = COALESCE(?, user_id)
             WHERE event_type = 'conn' AND peer_id = ? AND action = 'new'
               AND (conn_id = ? OR CAST(conn_id AS INTEGER) = ?)
-        `).run(String(peer[0]), connType, id || '', conn_id, parseInt(conn_id, 10));
+        `).run(String(peer[0]), connType, initiatorUserId, id || '', conn_id, parseInt(conn_id, 10));
     } else {
         const deviceUser = db.prepare('SELECT user_id FROM devices WHERE peer_id = ?').get(peer_id || '');
         const userId = req.user?.id || deviceUser?.user_id || null;

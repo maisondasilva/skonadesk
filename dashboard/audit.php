@@ -48,12 +48,19 @@ page_open('Audit Log');
       </thead>
       <tbody>
         <?php foreach ($rows as $row):
-            $type   = $row['event_type'] ?? '';
-            $badgeCls = $type === 'file' ? 'badge-info' : 'badge-online';
+            $evType   = $row['event_type'] ?? '';
+            $connType = isset($row['conn_type']) ? (int)$row['conn_type'] : null;
+            if ($evType === 'file') {
+                $label = 'file'; $badgeCls = 'badge-info';
+            } elseif ($connType === 1) {
+                $label = 'file xfer'; $badgeCls = 'badge-info';
+            } else {
+                $label = 'remote'; $badgeCls = 'badge-online';
+            }
         ?>
         <tr>
           <td style="white-space:nowrap;font-size:0.7rem;color:var(--text-muted)"><?= htmlspecialchars(substr($row['created_at'] ?? '', 0, 16)) ?></td>
-          <td><span class="badge <?= $badgeCls ?>"><?= htmlspecialchars($type) ?></span></td>
+          <td><span class="badge <?= $badgeCls ?>"><?= $label ?></span></td>
           <td><code style="font-size:0.7rem"><?= htmlspecialchars($row['peer_id'] ?? '') ?></code></td>
           <td><code style="font-size:0.7rem"><?= htmlspecialchars($row['remote_id'] ?? '') ?></code></td>
           <td><?= htmlspecialchars($row['username'] ?? '') ?></td>
