@@ -304,9 +304,10 @@ page_open('Server Info');
       <code class="code-block" id="cfgString"><?= htmlspecialchars($cfgString) ?></code>
       <button class="copy-btn" data-copy="#cfgString" title="Copy string"><svg data-feather="copy"></svg></button>
     </div>
+    <!-- config string algorithm credit: devastgh (github.com/devastgh) -->
     <p style="font-size:0.72rem;color:var(--text-muted);margin-top:12px">
       <strong>Note:</strong> The relay field is intentionally left blank — when host and relay are the same server,
-      RustDesk auto-detects the relay. Config credit: <a href="https://github.com/devastgh" target="_blank" rel="noopener">devastgh</a>.
+      RustDesk auto-detects the relay.
     </p>
   </div>
 </div>
