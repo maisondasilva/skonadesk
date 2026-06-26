@@ -205,8 +205,9 @@ Add two proxy hosts in [Nginx Proxy Manager](https://nginxproxymanager.com) (or 
 | `your.domain.com` | `skonadesk-api` | `21114` | Let's Encrypt |
 | `dashboard.your.domain.com` | `skonadesk-dashboard` | `80` | Let's Encrypt |
 
-> **NPM must be on the same Docker network** to resolve `skonadesk-api` and `skonadesk-dashboard` by hostname. SkonaDesk creates a network named `skonadesk`. Add it to NPM's `docker-compose.yml`:
+> **NPM must be on the same Docker network** to resolve `skonadesk-api` and `skonadesk-dashboard` by hostname. SkonaDesk creates a network named `skonadesk`. You have three options:
 >
+> **Option A — Edit NPM's compose file (recommended, persistent):**
 > ```yaml
 > networks:
 >   skonadesk:
@@ -219,10 +220,15 @@ Add two proxy hosts in [Nginx Proxy Manager](https://nginxproxymanager.com) (or 
 >       - default
 >       - skonadesk
 > ```
->
 > Then restart NPM: `docker compose down && docker compose up -d`
 >
-> If you prefer not to modify NPM's compose file, use the SkonaDesk container's host IP and mapped ports instead (`YOUR-SERVER-IP:21114` and `YOUR-SERVER-IP:8080`) as the forward targets — NPM doesn't need to be on the same network in that case.
+> **Option B — Quick one-liner (not persistent across NPM container restarts):**
+> ```bash
+> docker network connect skonadesk npm
+> ```
+> This works immediately with no restart, but is lost if the NPM container is ever recreated.
+>
+> **Option C — Skip Docker networking entirely:** Use the host IP and mapped ports (`YOUR-SERVER-IP:21114` and `YOUR-SERVER-IP:8080`) as the forward targets in NPM instead of container hostnames.
 
 No SSL? Skip this step — access the dashboard at `http://YOUR-IP:8080`.
 
@@ -271,10 +277,13 @@ Forward these ports from your router to the machine's LAN IP:
 | 21117 | 21117 | TCP | Relay |
 | 21118 | 21118 | TCP | WebSocket rendezvous |
 | 21119 | 21119 | TCP | WebSocket relay |
-| 21114 | 21114 | TCP | API *(if not using SSL)* |
-| 8080 | 8080 | TCP | Dashboard *(if not using SSL)* |
+| 443 | 443 | TCP | API + Dashboard via reverse proxy *(SSL — recommended)* |
+| 21114 | 21114 | TCP | API direct *(no SSL only — see note below)* |
+| 8080 | 8080 | TCP | Dashboard direct *(no SSL only — not recommended externally)* |
 
-> **Security tip:** If you're not using SSL, consider keeping ports 21114 and 8080 LAN-only and only forwarding the RustDesk protocol ports (21115–21119) externally. Access the dashboard via VPN or on the LAN.
+> **Important:** Port 21114 (API) **must be reachable by every connecting client** — it is required for JWT relay authentication. Without it, clients can register with the rendezvous server but the relay will reject their connections (they'll hang on "Connecting..."). Forwarding 21115–21119 without 21114 achieves nothing for external clients.
+>
+> **Security tip:** The strongly recommended approach is to put the API behind a reverse proxy with SSL (port 443) — then you do *not* forward port 21114 directly. Port 8080 (dashboard) should always be kept LAN-only or VPN-only; regular RustDesk clients never need dashboard access.
 
 ### Scenario C — LAN only / VPN only
 
