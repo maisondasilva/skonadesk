@@ -248,9 +248,11 @@ Or configure manually in the RustDesk client under **Settings → Network:**
 
 ## Deployment Scenarios
 
-### Scenario A — VPS with domain + SSL *(recommended)*
+### Scenario A — VPS with domain + SSL *(recommended for API transport security)*
 
-The most secure setup. A reverse proxy (Nginx Proxy Manager is the easiest choice) terminates HTTPS and forwards to the API and dashboard containers.
+A reverse proxy (Nginx Proxy Manager is the easiest choice) terminates HTTPS and forwards to the API and dashboard containers. All traffic between clients and the API is encrypted in transit.
+
+> **Note on dashboard exposure:** On a public VPS the dashboard is internet-facing, which is a larger attack surface than a home LAN deployment. For tighter security, restrict dashboard access to a VPN or firewall allowlist so only you can reach it — the API must remain publicly reachable for clients, but the dashboard does not.
 
 **Firewall / hosting panel — open these ports:**
 
