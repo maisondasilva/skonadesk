@@ -126,10 +126,12 @@ router.post('/audit/conn', optionalAuth, (req, res) => {
               AND (conn_id = ? OR CAST(conn_id AS INTEGER) = ?)
         `).run(String(peer[0]), connType, id || '', conn_id, parseInt(conn_id, 10));
     } else {
+        const deviceUser = db.prepare('SELECT user_id FROM devices WHERE peer_id = ?').get(id || '');
+        const userId = req.user?.id || deviceUser?.user_id || null;
         db.prepare(`
             INSERT INTO audit_log (event_type, peer_id, conn_id, user_id, remote_id, ip, action)
             VALUES ('conn', ?, ?, ?, ?, ?, ?)
-        `).run(id || '', conn_id || '', req.user?.id || null, peer_id || '', ip || '', action || '');
+        `).run(id || '', conn_id || '', userId, peer_id || '', ip || '', action || '');
     }
     res.json({ data: 'success' });
 });
@@ -137,10 +139,12 @@ router.post('/audit/conn', optionalAuth, (req, res) => {
 router.post('/audit/file', optionalAuth, (req, res) => {
     const { id, conn_id, uuid, peer_id, type, action, ip, file } = req.body || {};
     const db = getDb();
+    const deviceUser = db.prepare('SELECT user_id FROM devices WHERE peer_id = ?').get(id || '');
+    const userId = req.user?.id || deviceUser?.user_id || null;
     db.prepare(`
         INSERT INTO audit_log (event_type, peer_id, conn_id, user_id, remote_id, ip, action, note)
         VALUES ('file', ?, ?, ?, ?, ?, ?, ?)
-    `).run(id || '', conn_id || '', req.user?.id || null, peer_id || '', ip || '', action || '', file || '');
+    `).run(id || '', conn_id || '', userId, peer_id || '', ip || '', action || '', file || '');
     res.json({ data: 'success' });
 });
 

@@ -267,6 +267,51 @@ page_open('Server Info');
 </div>
 <?php endif; ?>
 
+<?php if ($domain && $pubKey):
+    $cfgPayload = json_encode([
+        'host'  => $domain,
+        'relay' => '',
+        'api'   => $apiUrl,
+        'key'   => $pubKey,
+    ], JSON_UNESCAPED_SLASHES);
+    $cfgString = strrev(rtrim(strtr(base64_encode($cfgPayload), '+/', '-_'), '='));
+?>
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">
+      <svg data-feather="package"></svg>
+      Pre-configured Client Filename
+    </div>
+  </div>
+  <div class="card-body">
+    <p style="font-size:var(--font-sm);color:var(--text-secondary);margin-bottom:16px">
+      RustDesk supports embedding server config directly into the client filename.
+      Download the standard RustDesk installer, rename it using the string below, and distribute it —
+      opening or installing it will automatically apply your server settings.
+      No manual configuration required for your users.
+    </p>
+    <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:12px">
+      Rename the downloaded <code>.exe</code> to:
+    </p>
+    <div class="copy-wrap" style="margin-bottom:16px">
+      <code class="code-block" id="cfgFilename">rustdesk-<?= htmlspecialchars($cfgString) ?>.exe</code>
+      <button class="copy-btn" data-copy="#cfgFilename" title="Copy filename"><svg data-feather="copy"></svg></button>
+    </div>
+    <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:4px">
+      Or paste just the config string into <strong>RustDesk → Network → ID/Relay Server → Import</strong>:
+    </p>
+    <div class="copy-wrap">
+      <code class="code-block" id="cfgString"><?= htmlspecialchars($cfgString) ?></code>
+      <button class="copy-btn" data-copy="#cfgString" title="Copy string"><svg data-feather="copy"></svg></button>
+    </div>
+    <p style="font-size:0.72rem;color:var(--text-muted);margin-top:12px">
+      <strong>Note:</strong> The relay field is intentionally left blank — when host and relay are the same server,
+      RustDesk auto-detects the relay. Config credit: <a href="https://github.com/devastgh" target="_blank" rel="noopener">devastgh</a>.
+    </p>
+  </div>
+</div>
+<?php endif; ?>
+
 <div class="card">
   <div class="card-header">
     <div class="card-title">
