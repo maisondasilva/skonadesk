@@ -16,33 +16,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'add') {
         $resp = api_post('/device-group/add', ['name' => trim($_POST['name'] ?? '')]);
-        $flash = api_ok($resp) ? "Group created." : api_error($resp);
+        $flash = api_ok($resp) ? __('groups.group_created') : api_error($resp);
         if (!api_ok($resp)) $flashType = 'danger';
 
     } elseif ($action === 'rename') {
         $id   = $_POST['group_id'] ?? '';
         $resp = api_put("/device-group/$id", ['name' => trim($_POST['name'] ?? '')]);
-        $flash = api_ok($resp) ? "Group renamed." : api_error($resp);
+        $flash = api_ok($resp) ? __('groups.group_renamed') : api_error($resp);
         if (!api_ok($resp)) $flashType = 'danger';
 
     } elseif ($action === 'delete') {
         $id   = $_POST['group_id'] ?? '';
         $resp = api_delete("/device-group/$id");
-        $flash = api_ok($resp) ? "Group deleted." : api_error($resp);
+        $flash = api_ok($resp) ? __('groups.group_deleted') : api_error($resp);
         if (!api_ok($resp)) $flashType = 'danger';
 
     } elseif ($action === 'add_member') {
         $gid    = $_POST['group_id'] ?? '';
         $uid    = (int)($_POST['user_id'] ?? 0);
         $resp   = api_post("/group/$gid/member", ['user_id' => $uid]);
-        $flash  = api_ok($resp) ? "User added to group." : api_error($resp);
+        $flash  = api_ok($resp) ? __('groups.user_added') : api_error($resp);
         if (!api_ok($resp)) $flashType = 'danger';
 
     } elseif ($action === 'remove_member') {
         $gid    = $_POST['group_id'] ?? '';
         $uid    = (int)($_POST['user_id'] ?? 0);
         $resp   = api_delete("/group/$gid/member/$uid");
-        $flash  = api_ok($resp) ? "User removed from group." : api_error($resp);
+        $flash  = api_ok($resp) ? __('groups.user_removed') : api_error($resp);
         if (!api_ok($resp)) $flashType = 'danger';
     }
 }
@@ -73,7 +73,7 @@ foreach ($allMemberships as $m) {
 $usersResp = api_get('/users', ['current' => 1, 'pageSize' => 500]);
 $allUsers  = $usersResp['data'] ?? [];
 
-page_open('Device Groups');
+page_open(__('groups.title'));
 ?>
 
 <?php if ($flash): ?>
@@ -81,10 +81,10 @@ page_open('Device Groups');
 <?php endif; ?>
 
 <div class="section-header">
-  <h2><?= $total ?> Group<?= $total !== 1 ? 's' : '' ?></h2>
+  <h2><?= __p('groups.count', $total) ?></h2>
   <button class="btn btn-primary" data-modal-open="addGroupModal">
     <svg data-feather="folder-plus"></svg>
-    Add Group
+    <?= __('groups.add_group') ?>
   </button>
 </div>
 
@@ -93,17 +93,17 @@ page_open('Device Groups');
     <?php if (empty($groups)): ?>
     <div class="empty-state">
       <svg data-feather="layers"></svg>
-      <h3>No groups yet</h3>
-      <p>Create groups to organise your devices and control which users can see them.</p>
+      <h3><?= __('groups.no_groups_title') ?></h3>
+      <p><?= __('groups.no_groups_desc') ?></p>
     </div>
     <?php else: ?>
     <table>
       <thead>
         <tr>
-          <th>Group Name</th>
-          <th>Devices</th>
-          <th>Members</th>
-          <th>Actions</th>
+          <th><?= __('groups.group_name') ?></th>
+          <th><?= __('groups.devices') ?></th>
+          <th><?= __('groups.members') ?></th>
+          <th><?= __('groups.actions') ?></th>
         </tr>
       </thead>
       <tbody>
@@ -116,14 +116,17 @@ page_open('Device Groups');
         <tr>
           <td><strong><?= htmlspecialchars($gname) ?></strong></td>
           <td>
-            <?= $count > 0
-                ? "<a href='/devices.php?group_id=$gid' style='color:var(--color-primary)'>$count device".($count!==1?'s':'')."</a>"
-                : '<span style="color:var(--text-muted)">0 devices</span>'
-            ?>
+            <?php if ($count > 0): ?>
+              <a href='/devices.php?group_id=<?= $gid ?>' style='color:var(--color-primary)'>
+                <?= sprintf($count === 1 ? __('groups.devices_count') : __('groups.devices_count_plural'), $count) ?>
+              </a>
+            <?php else: ?>
+              <span style="color:var(--text-muted)"><?= __('groups.zero_devices') ?></span>
+            <?php endif; ?>
           </td>
           <td>
             <?php if (empty($members)): ?>
-              <span style="color:var(--text-muted);font-size:0.75rem">No members</span>
+              <span style="color:var(--text-muted);font-size:0.75rem"><?= __('groups.no_members_text') ?></span>
             <?php else: ?>
               <div style="display:flex;flex-wrap:wrap;gap:4px">
                 <?php foreach ($members as $m): ?>
@@ -136,14 +139,14 @@ page_open('Device Groups');
           </td>
           <td>
             <div style="display:flex;gap:4px">
-              <button class="btn-icon" title="Manage members"
+              <button class="btn-icon" title="<?= __('groups.manage_members') ?>"
                 data-modal-open="membersModal"
                 data-id="<?= $gid ?>"
                 data-name="<?= htmlspecialchars($gname) ?>"
                 onclick="openMembersModal(this)">
                 <svg data-feather="users"></svg>
               </button>
-              <button class="btn-icon" title="Rename group"
+              <button class="btn-icon" title="<?= __('groups.rename_group') ?>"
                 data-modal-open="renameModal"
                 data-id="<?= htmlspecialchars((string)$gid) ?>"
                 data-name="<?= htmlspecialchars($gname) ?>"
@@ -154,7 +157,7 @@ page_open('Device Groups');
                 <input type="hidden" name="action"   value="delete" />
                 <input type="hidden" name="group_id" value="<?= $gid ?>" />
                 <button class="btn-icon danger" type="submit"
-                  data-confirm="Delete group '<?= htmlspecialchars($gname) ?>'? Devices will be unassigned and members removed.">
+                  data-confirm="<?= sprintf(__('groups.confirm_delete'), htmlspecialchars($gname, ENT_QUOTES)) ?>">
                   <svg data-feather="trash-2"></svg>
                 </button>
               </form>
@@ -169,30 +172,29 @@ page_open('Device Groups');
 </div>
 
 <div style="margin-top:16px;padding:12px 16px;background:var(--surface-alt,rgba(0,0,0,.05));border-radius:8px;font-size:0.78rem;color:var(--text-muted)">
-  <strong>How group visibility works:</strong>
-  Users only see devices that belong to groups they are members of, plus their own registered devices and any ungrouped devices.
-  Admins always see everything. Knowing a Device ID still allows a direct connection regardless of group membership.
+  <strong><?= __('groups.visibility_heading') ?></strong>
+  <?= __('groups.visibility_desc') ?>
 </div>
 
 <div class="modal-backdrop" id="addGroupModal">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Add Device Group</span>
+      <span class="modal-title"><?= __('groups.add_title') ?></span>
       <button class="modal-close" data-modal-close><svg data-feather="x"></svg></button>
     </div>
     <form method="POST">
       <input type="hidden" name="action" value="add" />
       <div class="modal-body">
         <div class="form-group">
-          <label for="newGroupName">Group Name *</label>
-          <input type="text" name="name" id="newGroupName" required placeholder="e.g. Office, Clients, Servers..." />
+          <label for="newGroupName"><?= __('groups.group_name_label') ?> *</label>
+          <input type="text" name="name" id="newGroupName" required placeholder="<?= __('groups.group_name_placeholder') ?>" />
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+        <button type="button" class="btn btn-ghost" data-modal-close><?= __('general.cancel') ?></button>
         <button type="submit" class="btn btn-primary">
           <svg data-feather="folder-plus"></svg>
-          Create Group
+          <?= __('groups.create_group') ?>
         </button>
       </div>
     </form>
@@ -202,7 +204,7 @@ page_open('Device Groups');
 <div class="modal-backdrop" id="renameModal">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Rename Group</span>
+      <span class="modal-title"><?= __('groups.rename_title') ?></span>
       <button class="modal-close" data-modal-close><svg data-feather="x"></svg></button>
     </div>
     <form method="POST">
@@ -210,15 +212,15 @@ page_open('Device Groups');
       <input type="hidden" name="group_id" id="renameId"  value="" />
       <div class="modal-body">
         <div class="form-group">
-          <label for="renameName">New Name *</label>
+          <label for="renameName"><?= __('groups.new_name_label') ?> *</label>
           <input type="text" name="name" id="renameName" required />
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+        <button type="button" class="btn btn-ghost" data-modal-close><?= __('general.cancel') ?></button>
         <button type="submit" class="btn btn-primary">
           <svg data-feather="save"></svg>
-          Rename
+          <?= __('groups.rename_btn') ?>
         </button>
       </div>
     </form>
@@ -228,12 +230,12 @@ page_open('Device Groups');
 <div class="modal-backdrop" id="membersModal">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title" id="membersModalTitle">Manage Members</span>
+      <span class="modal-title" id="membersModalTitle"><?= __('groups.members_title') ?></span>
       <button class="modal-close" data-modal-close><svg data-feather="x"></svg></button>
     </div>
     <div class="modal-body">
       <p style="font-size:0.8rem;color:var(--text-muted);margin:0 0 12px">
-        Members of this group can see devices assigned to it.
+        <?= __('groups.members_desc') ?>
       </p>
       <div id="membersList" style="margin-bottom:16px;display:flex;flex-direction:column;gap:6px"></div>
       <form method="POST" id="addMemberForm">
@@ -241,9 +243,9 @@ page_open('Device Groups');
         <input type="hidden" name="group_id" id="memberGroupId" value="" />
         <div style="display:flex;gap:8px;align-items:flex-end">
           <div class="form-group" style="flex:1;margin:0">
-            <label for="addMemberSelect">Add User</label>
+            <label for="addMemberSelect"><?= __('groups.add_user') ?></label>
             <select name="user_id" id="addMemberSelect">
-              <option value="">— Select user —</option>
+              <option value=""><?= __('groups.add_user_placeholder') ?></option>
               <?php foreach ($allUsers as $u): ?>
               <option value="<?= (int)($u['id'] ?? 0) ?>">
                 <?= htmlspecialchars($u['display_name'] ?: $u['name']) ?>
@@ -254,13 +256,13 @@ page_open('Device Groups');
           </div>
           <button type="submit" class="btn btn-primary" style="height:38px;white-space:nowrap">
             <svg data-feather="user-plus"></svg>
-            Add
+            <?= __('groups.add_btn') ?>
           </button>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-ghost" data-modal-close>Close</button>
+      <button type="button" class="btn btn-ghost" data-modal-close><?= __('groups.close') ?></button>
     </div>
   </div>
 </div>
@@ -271,7 +273,7 @@ const memberships = <?= json_encode($membersByGroup, JSON_UNESCAPED_UNICODE) ?>;
 function openMembersModal(btn) {
     const gid   = btn.dataset.id;
     const gname = btn.dataset.name;
-    document.getElementById('membersModalTitle').textContent = 'Members — ' + gname;
+    document.getElementById('membersModalTitle').textContent = '<?= __('groups.members_title') ?> — ' + gname;
     document.getElementById('memberGroupId').value = gid;
 
     const list    = document.getElementById('membersList');
@@ -279,7 +281,7 @@ function openMembersModal(btn) {
     list.innerHTML = '';
 
     if (members.length === 0) {
-        list.innerHTML = '<span style="font-size:0.8rem;color:var(--text-muted)">No members yet.</span>';
+        list.innerHTML = '<span style="font-size:0.8rem;color:var(--text-muted)"><?= __('groups.no_members') ?></span>';
     } else {
         members.forEach(m => {
             const row = document.createElement('div');
@@ -290,7 +292,7 @@ function openMembersModal(btn) {
                     <input type="hidden" name="action"   value="remove_member" />
                     <input type="hidden" name="group_id" value="${escHtml(String(gid))}" />
                     <input type="hidden" name="user_id"  value="${escHtml(String(m.user_id))}" />
-                    <button class="btn-icon danger" type="submit" title="Remove from group" style="width:26px;height:26px">
+                    <button class="btn-icon danger" type="submit" title="<?= __('groups.remove_from_group') ?>" style="width:26px;height:26px">
                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
@@ -318,7 +320,7 @@ function fillRename(btn) {
 }
 
 function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');
 }
 </script>
 

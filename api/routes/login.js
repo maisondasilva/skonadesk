@@ -104,6 +104,7 @@ router.post('/login', (req, res) => {
             note: '',
             status: user.status === 1 ? 1 : 0,
             is_admin: user.is_admin === 1,
+            language: user.language || '',
             info: {
                 email_verification: false,
                 email_alarm_notification: false,
@@ -142,6 +143,16 @@ router.put('/user/password', requireAuth, (req, res) => {
     res.json({ data: 'success' });
 });
 
+router.put('/user/language', requireAuth, (req, res) => {
+    const { language } = req.body || {};
+    if (!language || typeof language !== 'string') {
+        return res.status(400).json({ error: 'language is required' });
+    }
+    const db = getDb();
+    db.prepare('UPDATE users SET language = ? WHERE id = ?').run(language, req.user.id);
+    res.json({ data: 'success', language });
+});
+
 router.post('/currentUser', requireAuth, (req, res) => {
     const db = getDb();
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
@@ -157,6 +168,7 @@ router.post('/currentUser', requireAuth, (req, res) => {
         note: '',
         status: user.status === 1 ? 1 : 0,
         is_admin: user.is_admin === 1,
+        language: user.language || '',
         info: {
             email_verification: false,
             email_alarm_notification: false,
