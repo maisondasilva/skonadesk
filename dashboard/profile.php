@@ -102,7 +102,7 @@ page_open(__('profile.title'));
           <span class="info-label"><?= __('profile.language') ?></span>
           <form method="POST" class="info-value" style="display:flex;align-items:center;gap:8px;margin:0">
             <input type="hidden" name="action" value="change_language" />
-            <select name="language" onchange="this.form.submit()" style="padding:4px 8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.8rem">
+            <select name="language" onchange="this.form.submit()" style="padding:4px 8px;border-radius:var(--radius);border:1px solid var(--border-input);background:var(--surface-input);color:var(--text-primary);font-size:0.8rem;color-scheme:dark">
               <?php foreach ($availableLangs as $l): ?>
               <option value="<?= htmlspecialchars($l['code']) ?>"<?= $l['code'] === $currentLang ? ' selected' : '' ?>>
                 <?= htmlspecialchars($l['name_native']) ?> (<?= htmlspecialchars($l['name']) ?>)
