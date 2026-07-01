@@ -1,4 +1,8 @@
 {
+  "_meta": {
+    "name": "German",
+    "name_native": "Deutsch"
+  },
   "app": {
     "name": "SkonaDesk",
     "tagline": "Remote-Desktop-Management",
@@ -418,10 +422,5 @@
     "create": "Erstellen",
     "copy": "Kopieren",
     "confirm": "Sind Sie sicher?"
-  },
-  "_meta": {
-    "name": "German",
-    "name_native": "Deutsch",
-    "source": "machine translated (DeepSeek-V4-Pro)"
   }
 }

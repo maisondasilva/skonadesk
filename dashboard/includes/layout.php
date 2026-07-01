@@ -28,10 +28,9 @@ function page_open(string $title, string $activeFile = ''): void {
     $langCode = get_effective_language();
     LanguageService::init($langCode);
 ?><!DOCTYPE html>
-<html lang="<?= LanguageService::getCode() ?>" data-theme="dark" style="color-scheme:dark">
+<html lang="<?= LanguageService::getCode() ?>" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="color-scheme" content="dark" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?= htmlspecialchars($title) ?> | <?= $appName ?></title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />

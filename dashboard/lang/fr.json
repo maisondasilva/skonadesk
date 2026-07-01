@@ -1,4 +1,9 @@
 {
+  "_meta": {
+    "name": "French",
+    "name_native": "Français",
+    "source": "machine translated (DeepSeek-V4-Pro)"
+  },
   "app": {
     "name": "SkonaDesk",
     "tagline": "Gestion de bureau à distance",
@@ -418,10 +423,5 @@
     "create": "Créer",
     "copy": "Copier",
     "confirm": "Êtes-vous sûr ?"
-  },
-  "_meta": {
-    "name": "French",
-    "name_native": "Français",
-    "source": "machine translated (DeepSeek-V4-Pro)"
   }
 }

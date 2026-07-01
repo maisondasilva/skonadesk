@@ -1,8 +1,7 @@
 {
   "_meta": {
     "name": "English",
-    "name_native": "English",
-    "source": "github - Skonamonkey"
+    "name_native": "English"
   },
   "app": {
     "name": "SkonaDesk",

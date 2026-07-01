@@ -49,7 +49,7 @@ page_open(__('settings.title'));
 
         <div class="form-group">
           <label for="defaultLanguage"><?= __('settings.default_language') ?></label>
-          <select id="defaultLanguage" name="default_language" style="padding:8px 10px;border-radius:var(--radius);border:1px solid var(--border-input);background:var(--surface-input);color:var(--text-primary);width:100%;font-size:var(--font-sm);color-scheme:dark">
+          <select id="defaultLanguage" name="default_language" style="padding:8px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-input);color:var(--text);width:100%;font-size:var(--font-sm)">
             <?php foreach ($availableLangs as $l): ?>
             <option value="<?= htmlspecialchars($l['code']) ?>"<?= $l['code'] === $currentDefault ? ' selected' : '' ?>>
               <?= htmlspecialchars($l['name_native']) ?> (<?= htmlspecialchars($l['name']) ?>)
