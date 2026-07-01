@@ -460,7 +460,7 @@ page_open(__('server.title'));
           ];
           foreach ($rows as $i => $r):
             $bg = $i % 2 === 0 ? 'background:var(--surface-alt,rgba(0,0,0,.03))' : '';
-            $ok = str_starts_with($r[6], '✅');
+            $ok = $r[0] === '✅' && $r[1] === '✅' && $r[3] === '✅';
           ?>
           <tr style="<?= $bg ?>">
             <?php for ($c = 0; $c < 6; $c++): ?>
