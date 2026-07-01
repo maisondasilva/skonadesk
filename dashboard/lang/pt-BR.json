@@ -1,7 +1,8 @@
 {
   "_meta": {
     "name": "Português",
-    "name_native": "Português"
+    "name_native": "Português",
+    "source": "github - maisondesilva"
   },
   "app": {
     "name": "SkonaDesk",

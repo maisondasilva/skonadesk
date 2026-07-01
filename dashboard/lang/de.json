@@ -421,6 +421,7 @@
   },
   "_meta": {
     "name": "German",
-    "name_native": "Deutsch"
+    "name_native": "Deutsch",
+    "source": "machine translated (DeepSeek-V4-Pro)"
   }
 }
