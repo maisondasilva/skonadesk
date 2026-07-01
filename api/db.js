@@ -30,6 +30,7 @@ function initSchema() {
             name        TEXT,
             is_admin    INTEGER DEFAULT 0,
             status      INTEGER DEFAULT 1,
+            language    TEXT    DEFAULT '',
             created_at  TEXT    DEFAULT (datetime('now'))
         );
 
@@ -115,6 +116,11 @@ function initSchema() {
             PRIMARY KEY (peer_id, group_id),
             FOREIGN KEY (group_id) REFERENCES device_groups(id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS settings (
+            key   TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        );
     `);
 
     db.exec(`
@@ -122,11 +128,17 @@ function initSchema() {
         SELECT peer_id, group_id FROM devices WHERE group_id IS NOT NULL
     `);
 
+    // Seed default settings
+    db.exec(`
+        INSERT OR IGNORE INTO settings (key, value) VALUES ('default_language', 'en')
+    `);
+
     const migrations = [
         "ALTER TABLE devices ADD COLUMN cpu       TEXT DEFAULT ''",
         "ALTER TABLE devices ADD COLUMN memory    TEXT DEFAULT ''",
         "ALTER TABLE devices ADD COLUMN wan_ip    TEXT DEFAULT ''",
         "ALTER TABLE audit_log ADD COLUMN conn_type INTEGER",
+        "ALTER TABLE users ADD COLUMN language TEXT DEFAULT ''",
     ];
     for (const sql of migrations) {
         try { db.exec(sql); } catch (_) {}

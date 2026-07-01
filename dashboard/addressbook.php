@@ -29,31 +29,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'note'  => $note,
                 'tags'  => [],
             ]);
-            $flash = api_ok($resp) ? "Peer added to address book." : ("Failed: " . ($resp['error'] ?? 'unknown'));
+            $flash = api_ok($resp) ? __('addressbook.peer_added') : ("Failed: " . ($resp['error'] ?? 'unknown'));
             if (!api_ok($resp)) $flashType = 'danger';
         } else {
-            $flash = 'Device ID is required.';
+            $flash = __('addressbook.device_id_required');
             $flashType = 'danger';
         }
 
     } elseif ($action === 'delete_peer' && $abGuid) {
         $peerId = $_POST['peer_id'] ?? '';
         $resp   = api_request('DELETE', "/ab/peer/$abGuid", [$peerId]);
-        $flash  = api_ok($resp) ? "Peer removed." : ("Failed: " . ($resp['error'] ?? 'unknown'));
+        $flash  = api_ok($resp) ? __('addressbook.peer_removed') : ("Failed: " . ($resp['error'] ?? 'unknown'));
         if (!api_ok($resp)) $flashType = 'danger';
 
     } elseif ($action === 'add_tag' && $abGuid) {
         $tagName = trim($_POST['tag_name'] ?? '');
         if ($tagName) {
             $resp  = api_post("/ab/tag/add/$abGuid", ['name' => $tagName, 'color' => 0]);
-            $flash = api_ok($resp) ? "Tag added." : ("Failed: " . ($resp['error'] ?? 'unknown'));
+            $flash = api_ok($resp) ? __('addressbook.tag_added') : ("Failed: " . ($resp['error'] ?? 'unknown'));
             if (!api_ok($resp)) $flashType = 'danger';
         }
 
     } elseif ($action === 'delete_tag' && $abGuid) {
         $tagName = $_POST['tag_name'] ?? '';
         $resp    = api_request('DELETE', "/ab/tag/$abGuid", [$tagName]);
-        $flash   = api_ok($resp) ? "Tag removed." : ("Failed: " . ($resp['error'] ?? 'unknown'));
+        $flash   = api_ok($resp) ? __('addressbook.tag_removed') : ("Failed: " . ($resp['error'] ?? 'unknown'));
         if (!api_ok($resp)) $flashType = 'danger';
     }
 
@@ -95,7 +95,7 @@ if ($user['is_admin']) {
 $allDevicesResp = api_get('/peers', ['current' => 1, 'pageSize' => 500]);
 $allDevices = $allDevicesResp['data'] ?? [];
 
-page_open('Address Book');
+page_open(__('addressbook.title'));
 ?>
 
 <?php if ($flash): ?>
@@ -103,14 +103,14 @@ page_open('Address Book');
 <?php endif; ?>
 
 <div class="section-header" style="margin-bottom:20px">
-  <h2>Address Book</h2>
+  <h2><?= __('addressbook.title') ?></h2>
 
   <?php if ($user['is_admin'] && !empty($userList)): ?>
   <form method="GET" style="display:flex;align-items:center;gap:8px">
-    <label for="userSel" style="font-size:var(--font-sm);color:var(--text-muted);white-space:nowrap">Viewing:</label>
+    <label for="userSel" style="font-size:var(--font-sm);color:var(--text-muted);white-space:nowrap"><?= __('addressbook.viewing') ?></label>
     <div style="min-width:180px">
       <select id="userSel" name="user_id" onchange="this.form.submit()">
-        <option value="<?= $user['id'] ?>"<?= $viewUserId === $user['id'] ? ' selected' : '' ?>>My Book</option>
+        <option value="<?= $user['id'] ?>"<?= $viewUserId === $user['id'] ? ' selected' : '' ?>><?= __('addressbook.my_book') ?></option>
         <?php foreach ($userList as $u):
             if ($u['name'] === $user['username']) continue; ?>
         <option value="<?= $u['id'] ?>"<?= $viewUserId === (int)$u['id'] ? ' selected' : '' ?>>
@@ -124,7 +124,7 @@ page_open('Address Book');
 
   <?php if ($abGuid): ?>
   <button class="btn btn-primary" data-modal-open="addPeerModal">
-    <svg data-feather="plus"></svg> Add Peer
+    <svg data-feather="plus"></svg> <?= __('addressbook.add_peer') ?>
   </button>
   <?php endif; ?>
 </div>
@@ -133,8 +133,8 @@ page_open('Address Book');
 <div class="card">
   <div class="empty-state">
     <svg data-feather="book"></svg>
-    <h3>No address book yet</h3>
-    <p>This user's address book will be created when they first log in.</p>
+    <h3><?= __('addressbook.no_book_title') ?></h3>
+    <p><?= __('addressbook.no_book_desc') ?></p>
   </div>
 </div>
 <?php else: ?>
@@ -144,25 +144,25 @@ page_open('Address Book');
 <div class="card" style="padding:0;overflow:hidden">
   <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
     <svg data-feather="users" style="width:16px;height:16px;color:var(--accent)"></svg>
-    <strong style="font-size:var(--font-sm)"><?= count($peers) ?> Peer<?= count($peers) !== 1 ? 's' : '' ?></strong>
+    <strong style="font-size:var(--font-sm)"><?= __p('addressbook.peers_count', count($peers)) ?></strong>
   </div>
 
   <?php if (empty($peers)): ?>
   <div class="empty-state" style="padding:40px">
     <svg data-feather="user-plus"></svg>
-    <p>No peers in this address book yet.</p>
+    <p><?= __('addressbook.no_peers') ?></p>
   </div>
   <?php else: ?>
   <div class="table-wrap">
   <table>
     <thead>
       <tr>
-        <th>Device ID</th>
-        <th>Alias</th>
-        <th>Host / User</th>
-        <th>Platform</th>
-        <th>Tags</th>
-        <th>Note</th>
+        <th><?= __('addressbook.device_id') ?></th>
+        <th><?= __('addressbook.alias') ?></th>
+        <th><?= __('addressbook.host_user') ?></th>
+        <th><?= __('addressbook.platform') ?></th>
+        <th><?= __('addressbook.tags') ?></th>
+        <th><?= __('addressbook.note') ?></th>
         <th></th>
       </tr>
     </thead>
@@ -197,7 +197,7 @@ page_open('Address Book');
             <input type="hidden" name="user_id"  value="<?= $viewUserId ?>" />
             <?php endif; ?>
             <button class="btn-icon danger" type="submit"
-              data-confirm="Remove <?= htmlspecialchars($p['id'] ?? 'this peer') ?> from address book?">
+              data-confirm="<?= htmlspecialchars(__('addressbook.confirm_remove', $p['id'] ?? '')) ?>">
               <svg data-feather="trash-2"></svg>
             </button>
           </form>
@@ -215,14 +215,14 @@ page_open('Address Book');
     <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
       <div style="display:flex;align-items:center;gap:8px">
         <svg data-feather="tag" style="width:16px;height:16px;color:var(--accent)"></svg>
-        <strong style="font-size:var(--font-sm)"><?= count($tags) ?> Tag<?= count($tags) !== 1 ? 's' : '' ?></strong>
+        <strong style="font-size:var(--font-sm)"><?= __p('addressbook.tags_count', count($tags)) ?></strong>
       </div>
-      <button class="btn-icon" title="Add tag" data-modal-open="addTagModal">
+      <button class="btn-icon" title="<?= __('addressbook.add_tag') ?>" data-modal-open="addTagModal">
         <svg data-feather="plus"></svg>
       </button>
     </div>
     <?php if (empty($tags)): ?>
-    <div style="padding:20px;color:var(--text-muted);font-size:var(--font-sm);text-align:center">No tags yet</div>
+    <div style="padding:20px;color:var(--text-muted);font-size:var(--font-sm);text-align:center"><?= __('addressbook.no_tags') ?></div>
     <?php else: ?>
     <ul style="list-style:none;margin:0;padding:8px 0">
       <?php foreach ($tags as $tag): ?>
@@ -232,8 +232,8 @@ page_open('Address Book');
           <input type="hidden" name="action"   value="delete_tag" />
           <input type="hidden" name="ab_guid"  value="<?= htmlspecialchars($abGuid) ?>" />
           <input type="hidden" name="tag_name" value="<?= htmlspecialchars($tag['name'] ?? '') ?>" />
-          <button class="btn-icon danger" type="submit" title="Remove tag"
-            data-confirm="Remove tag &quot;<?= htmlspecialchars($tag['name'] ?? '') ?>&quot;?">
+          <button class="btn-icon danger" type="submit" title="<?= __('addressbook.remove_tag') ?>"
+            data-confirm="<?= htmlspecialchars(__('addressbook.confirm_remove_tag', $tag['name'] ?? '')) ?>">
             <svg data-feather="x"></svg>
           </button>
         </form>
@@ -250,7 +250,7 @@ page_open('Address Book');
 <div class="modal-backdrop" id="addPeerModal">
   <div class="modal" style="max-width:520px">
     <div class="modal-header">
-      <span class="modal-title">Add Peer to Address Book</span>
+      <span class="modal-title"><?= __('addressbook.add_title') ?></span>
       <button class="modal-close" data-modal-close><svg data-feather="x"></svg></button>
     </div>
     <form method="POST">
@@ -263,10 +263,10 @@ page_open('Address Book');
 
         <?php if (!empty($allDevices)): ?>
         <div class="form-group" style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)">
-          <label for="devicePicker">Pick a known device</label>
+          <label for="devicePicker"><?= __('addressbook.pick_device') ?></label>
           <select id="devicePicker" onchange="abFillFromDevice(this)"
                   style="padding:8px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--card);color:var(--text);width:100%;font-size:var(--font-sm)">
-            <option value="">— Select a device —</option>
+            <option value=""><?= __('addressbook.pick_device_placeholder') ?></option>
             <?php foreach ($allDevices as $d):
                 $did   = $d['id'] ?? '';
                 $dname = $d['info']['device_name'] ?? ($d['info']['hostname'] ?? $did);
@@ -282,29 +282,29 @@ page_open('Address Book');
             <?php endforeach; ?>
           </select>
           <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px">
-            Selecting a device auto-fills the fields below. You can still edit them.
+            <?= __('addressbook.pick_device_hint') ?>
           </div>
         </div>
         <?php endif; ?>
 
         <div class="form-group" style="margin-bottom:16px">
-          <label for="newPeerId">Device ID <span style="color:var(--danger)">*</span></label>
-          <input type="text" name="peer_id" id="newPeerId" required placeholder="e.g. 123456789" />
+          <label for="newPeerId"><?= __('addressbook.device_id_label') ?> <span style="color:var(--danger)">*</span></label>
+          <input type="text" name="peer_id" id="newPeerId" required placeholder="<?= __('addressbook.device_id_placeholder') ?>" />
         </div>
         <div class="form-group" style="margin-bottom:16px">
-          <label for="newAlias">Alias / Display Name</label>
-          <input type="text" name="alias" id="newAlias" placeholder="e.g. Office Desktop" />
+          <label for="newAlias"><?= __('addressbook.alias_label') ?></label>
+          <input type="text" name="alias" id="newAlias" placeholder="<?= __('addressbook.alias_placeholder') ?>" />
         </div>
         <div class="form-group">
-          <label for="newNote">Note</label>
-          <input type="text" name="note" id="newNote" placeholder="Optional note" />
+          <label for="newNote"><?= __('addressbook.note_label') ?></label>
+          <input type="text" name="note" id="newNote" placeholder="<?= __('addressbook.note_placeholder') ?>" />
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+        <button type="button" class="btn btn-ghost" data-modal-close><?= __('general.cancel') ?></button>
         <button type="submit" class="btn btn-primary">
           <svg data-feather="user-plus"></svg>
-          Add Peer
+          <?= __('addressbook.add_peer') ?>
         </button>
       </div>
     </form>
@@ -324,7 +324,7 @@ function abFillFromDevice(sel) {
 <div class="modal-backdrop" id="addTagModal">
   <div class="modal" style="max-width:380px">
     <div class="modal-header">
-      <span class="modal-title">Add Tag</span>
+      <span class="modal-title"><?= __('addressbook.add_tag_title') ?></span>
       <button class="modal-close" data-modal-close><svg data-feather="x"></svg></button>
     </div>
     <form method="POST">
@@ -335,15 +335,15 @@ function abFillFromDevice(sel) {
       <?php endif; ?>
       <div class="modal-body">
         <div class="form-group">
-          <label for="newTagName">Tag Name <span style="color:var(--danger)">*</span></label>
-          <input type="text" name="tag_name" id="newTagName" required placeholder="e.g. Servers" />
+          <label for="newTagName"><?= __('addressbook.tag_name_label') ?> <span style="color:var(--danger)">*</span></label>
+          <input type="text" name="tag_name" id="newTagName" required placeholder="<?= __('addressbook.tag_name_placeholder') ?>" />
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+        <button type="button" class="btn btn-ghost" data-modal-close><?= __('general.cancel') ?></button>
         <button type="submit" class="btn btn-primary">
           <svg data-feather="tag"></svg>
-          Add Tag
+          <?= __('addressbook.add_tag_btn') ?>
         </button>
       </div>
     </form>

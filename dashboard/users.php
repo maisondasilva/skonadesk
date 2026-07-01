@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'email'    => trim($_POST['email']    ?? ''),
             'is_admin' => !empty($_POST['is_admin']),
         ]);
-        $flash = api_ok($resp) ? "User created." : api_error($resp);
+        $flash = api_ok($resp) ? __('users.user_created') : api_error($resp);
         if (!api_ok($resp)) $flashType = 'danger';
 
     } elseif ($action === 'edit') {
@@ -37,13 +37,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data['is_admin'] = !empty($_POST['is_admin']);
         $data['status']   = !empty($_POST['active']);
         $resp = api_put("/users/$uname", $data);
-        $flash = api_ok($resp) ? "User updated." : api_error($resp);
+        $flash = api_ok($resp) ? __('users.user_updated') : api_error($resp);
         if (!api_ok($resp)) $flashType = 'danger';
 
     } elseif ($action === 'delete') {
         $uname = $_POST['username'] ?? '';
         $resp  = api_delete("/users/$uname");
-        $flash = api_ok($resp) ? "User deleted." : api_error($resp);
+        $flash = api_ok($resp) ? __('users.user_deleted') : api_error($resp);
         if (!api_ok($resp)) $flashType = 'danger';
     }
 }
@@ -53,7 +53,7 @@ $users = $resp['data']  ?? [];
 $total = $resp['total'] ?? 0;
 $pages = (int)ceil($total / $pageSize);
 
-page_open('Users');
+page_open(__('users.title'));
 ?>
 
 <?php if ($flash): ?>
@@ -61,10 +61,10 @@ page_open('Users');
 <?php endif; ?>
 
 <div class="section-header">
-  <h2><?= $total ?> User<?= $total !== 1 ? 's' : '' ?></h2>
+  <h2><?= __p('users.count', $total) ?></h2>
   <button class="btn btn-primary" data-modal-open="addUserModal">
     <svg data-feather="user-plus"></svg>
-    Add User
+    <?= __('users.add_user') ?>
   </button>
 </div>
 
@@ -73,18 +73,18 @@ page_open('Users');
     <?php if (empty($users)): ?>
     <div class="empty-state">
       <svg data-feather="users"></svg>
-      <h3>No users</h3>
+      <h3><?= __('users.no_users') ?></h3>
     </div>
     <?php else: ?>
     <table>
       <thead>
         <tr>
-          <th>Username</th>
-          <th>Display Name</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Status</th>
-          <th>Actions</th>
+          <th><?= __('users.username') ?></th>
+          <th><?= __('users.display_name') ?></th>
+          <th><?= __('users.email') ?></th>
+          <th><?= __('users.role') ?></th>
+          <th><?= __('users.status') ?></th>
+          <th><?= __('users.actions') ?></th>
         </tr>
       </thead>
       <tbody>
@@ -97,14 +97,14 @@ page_open('Users');
             $isSelf = ($uname === $me['username']);
         ?>
         <tr>
-          <td><strong><?= htmlspecialchars($uname) ?></strong><?= $isSelf ? ' <span style="font-size:0.65rem;color:var(--text-muted)">(you)</span>' : '' ?></td>
+          <td><strong><?= htmlspecialchars($uname) ?></strong><?= $isSelf ? ' <span style="font-size:0.65rem;color:var(--text-muted)">' . __('users.you_label') . '</span>' : '' ?></td>
           <td><?= htmlspecialchars($dname) ?></td>
           <td style="color:var(--text-muted)"><?= htmlspecialchars($email) ?></td>
-          <td><?= $admin ? '<span class="badge badge-admin">Admin</span>' : '<span style="color:var(--text-muted)">User</span>' ?></td>
-          <td><?= $active ? '<span class="badge badge-active">Active</span>' : '<span class="badge badge-inactive">Inactive</span>' ?></td>
+          <td><?= $admin ? '<span class="badge badge-admin">' . __('users.admin') . '</span>' : '<span style="color:var(--text-muted)">' . __('users.user') . '</span>' ?></td>
+          <td><?= $active ? '<span class="badge badge-active">' . __('users.active') . '</span>' : '<span class="badge badge-inactive">' . __('users.inactive') . '</span>' ?></td>
           <td>
             <div style="display:flex;gap:4px">
-              <button class="btn-icon" title="Edit user"
+              <button class="btn-icon" title="<?= __('users.edit_user') ?>"
                 data-modal-open="editUserModal"
                 data-username="<?= htmlspecialchars($uname) ?>"
                 data-display="<?= htmlspecialchars($dname) ?>"
@@ -119,7 +119,7 @@ page_open('Users');
                 <input type="hidden" name="action"   value="delete" />
                 <input type="hidden" name="username" value="<?= htmlspecialchars($uname) ?>" />
                 <button class="btn-icon danger" type="submit"
-                  data-confirm="Delete user '<?= htmlspecialchars($uname) ?>'?">
+                  data-confirm="<?= htmlspecialchars(__('users.confirm_delete', $uname)) ?>">
                   <svg data-feather="trash-2"></svg>
                 </button>
               </form>
@@ -134,7 +134,7 @@ page_open('Users');
   </div>
   <?php if ($pages > 1): ?>
   <div class="pagination">
-    <span class="page-info">Page <?= $page ?> of <?= $pages ?></span>
+    <span class="page-info"><?= __('users.page', $page, $pages) ?></span>
     <?php for ($p = max(1,$page-2); $p <= min($pages,$page+2); $p++): ?>
     <a class="page-btn<?= $p===$page?' active':'' ?>" href="?page=<?= $p ?>"><?= $p ?></a>
     <?php endfor; ?>
@@ -145,7 +145,7 @@ page_open('Users');
 <div class="modal-backdrop" id="addUserModal">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Add New User</span>
+      <span class="modal-title"><?= __('users.add_title') ?></span>
       <button class="modal-close" data-modal-close><svg data-feather="x"></svg></button>
     </div>
     <form method="POST">
@@ -153,34 +153,34 @@ page_open('Users');
       <div class="modal-body">
         <div class="form-row">
           <div class="form-group">
-            <label>Username *</label>
-            <input type="text" name="username" required placeholder="e.g. johnd" />
+            <label><?= __('users.username') ?> *</label>
+            <input type="text" name="username" required placeholder="<?= __('users.username_placeholder') ?>" />
           </div>
           <div class="form-group">
-            <label>Display Name</label>
-            <input type="text" name="name" placeholder="Full name" />
+            <label><?= __('users.display_name') ?></label>
+            <input type="text" name="name" placeholder="<?= __('users.display_name_placeholder') ?>" />
           </div>
         </div>
         <div class="form-row" style="margin-top:14px">
           <div class="form-group">
-            <label>Password *</label>
-            <input type="password" name="password" required placeholder="Secure password" />
+            <label><?= __('users.password') ?> *</label>
+            <input type="password" name="password" required placeholder="<?= __('users.password_placeholder') ?>" />
           </div>
           <div class="form-group">
-            <label>Email</label>
-            <input type="email" name="email" placeholder="Optional" />
+            <label><?= __('users.email') ?></label>
+            <input type="email" name="email" placeholder="<?= __('users.email_placeholder') ?>" />
           </div>
         </div>
         <div class="form-check" style="margin-top:14px">
           <input type="checkbox" name="is_admin" id="newAdmin" value="1" />
-          <label for="newAdmin">Administrator</label>
+          <label for="newAdmin"><?= __('users.admin_checkbox') ?></label>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+        <button type="button" class="btn btn-ghost" data-modal-close><?= __('general.cancel') ?></button>
         <button type="submit" class="btn btn-primary">
           <svg data-feather="user-plus"></svg>
-          Create User
+          <?= __('users.create_user') ?>
         </button>
       </div>
     </form>
@@ -190,7 +190,7 @@ page_open('Users');
 <div class="modal-backdrop" id="editUserModal">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Edit User</span>
+      <span class="modal-title"><?= __('users.edit_title') ?></span>
       <button class="modal-close" data-modal-close><svg data-feather="x"></svg></button>
     </div>
     <form method="POST">
@@ -199,40 +199,40 @@ page_open('Users');
       <div class="modal-body">
         <div class="form-row">
           <div class="form-group">
-            <label>Username</label>
+            <label><?= __('users.username') ?></label>
             <input type="text" id="editUsernameDisplay" readonly style="opacity:0.6" />
           </div>
           <div class="form-group">
-            <label>Display Name</label>
+            <label><?= __('users.display_name') ?></label>
             <input type="text" name="display_name" id="editDisplayName" />
           </div>
         </div>
         <div class="form-row" style="margin-top:14px">
           <div class="form-group">
-            <label>New Password <span style="font-weight:400;color:var(--text-muted)">(leave blank to keep)</span></label>
-            <input type="password" name="new_password" placeholder="New password..." />
+            <label><?= __('users.new_password') ?> <span style="font-weight:400;color:var(--text-muted)">(<?= __('users.new_password_hint') ?>)</span></label>
+            <input type="password" name="new_password" placeholder="<?= __('users.new_password_placeholder') ?>" />
           </div>
           <div class="form-group">
-            <label>Email</label>
+            <label><?= __('users.email') ?></label>
             <input type="email" name="email" id="editEmail" />
           </div>
         </div>
         <div style="display:flex;gap:20px;margin-top:14px">
           <div class="form-check">
             <input type="checkbox" name="is_admin" id="editAdmin" value="1" />
-            <label for="editAdmin">Administrator</label>
+            <label for="editAdmin"><?= __('users.admin_checkbox') ?></label>
           </div>
           <div class="form-check">
             <input type="checkbox" name="active" id="editActive" value="1" checked />
-            <label for="editActive">Active account</label>
+            <label for="editActive"><?= __('users.active_checkbox') ?></label>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+        <button type="button" class="btn btn-ghost" data-modal-close><?= __('general.cancel') ?></button>
         <button type="submit" class="btn btn-primary">
           <svg data-feather="save"></svg>
-          Save Changes
+          <?= __('users.save_changes') ?>
         </button>
       </div>
     </form>

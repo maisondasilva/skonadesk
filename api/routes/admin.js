@@ -445,4 +445,25 @@ router.get('/ab/admin', requireAuth, requireAdmin, (req, res) => {
     res.json({ guid: abRow.guid, peers, tags });
 });
 
+// ── Settings ────────────────────────────────────────────────────────────────
+
+router.get('/settings', requireAuth, requireAdmin, (req, res) => {
+    const db = getDb();
+    const rows = db.prepare('SELECT key, value FROM settings').all();
+    const settings = {};
+    for (const row of rows) {
+        settings[row.key] = row.value;
+    }
+    res.json({ data: settings });
+});
+
+router.put('/settings', requireAuth, requireAdmin, (req, res) => {
+    const db = getDb();
+    const { default_language } = req.body || {};
+    if (default_language !== undefined) {
+        db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('default_language', default_language);
+    }
+    res.json({ data: 'ok' });
+});
+
 module.exports = router;
