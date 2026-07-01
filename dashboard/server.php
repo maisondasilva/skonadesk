@@ -19,7 +19,7 @@ $apiUrl     = API_PUBLIC_URL ?: ($domain ? $apiScheme . '://' . $domain . $apiPo
 $httpHost   = $_SERVER['HTTP_HOST'] ?? '';
 $dashPort   = (int)(parse_url('http://' . $httpHost, PHP_URL_PORT) ?: ($isIp ? 8080 : 443));
 
-page_open('Server Info');
+page_open(__('server.title'));
 ?>
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px" class="server-grid">
@@ -28,24 +28,24 @@ page_open('Server Info');
     <div class="card-header">
       <div class="card-title">
         <svg data-feather="key"></svg>
-        Server Public Key
+        <?= __('server.public_key') ?>
       </div>
     </div>
     <div class="card-body">
       <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:16px">
-        Copy this key into the RustDesk client's <strong>Key</strong> field under Network settings
-        to ensure you're connecting to this specific server.
+        <?= __('server.copy_key_desc') ?>
       </p>
       <?php if ($pubKey): ?>
       <div class="copy-wrap">
         <code class="code-block" id="pubKey"><?= htmlspecialchars($pubKey) ?></code>
-        <button class="copy-btn" data-copy="#pubKey" title="Copy key">
+        <button class="copy-btn" data-copy="#pubKey" title="<?= __('general.copy') ?>">
           <svg data-feather="copy"></svg>
         </button>
       </div>
       <?php else: ?>
       <div class="alert alert-warning">
-        Public key not found. Check that <code>/data/id_ed25519.pub</code> is mounted correctly.
+        <?= __('server.key_not_found', '/data/id_ed25519.pub') ?><br>
+        <?= __('server.key_not_found_hint') ?>
       </div>
       <?php endif; ?>
     </div>
@@ -55,34 +55,34 @@ page_open('Server Info');
     <div class="card-header">
       <div class="card-title">
         <svg data-feather="server"></svg>
-        Server Addresses
+        <?= __('server.server_addresses') ?>
       </div>
     </div>
     <div class="card-body">
       <?php if ($domain): ?>
       <div class="info-row">
-        <span class="info-label">Rendezvous (hbbs)</span>
+        <span class="info-label"><?= __('server.rendezvous_label') ?></span>
         <div class="info-value copy-wrap">
           <code class="code-block" id="hbbsHost"><?= htmlspecialchars($domain) ?></code>
           <button class="copy-btn" data-copy="#hbbsHost" title="Copy"><svg data-feather="copy"></svg></button>
         </div>
       </div>
       <div class="info-row">
-        <span class="info-label">Relay (hbbr)</span>
+        <span class="info-label"><?= __('server.relay_label') ?></span>
         <div class="info-value copy-wrap">
           <code class="code-block" id="hbbrHost"><?= htmlspecialchars($domain) ?></code>
           <button class="copy-btn" data-copy="#hbbrHost" title="Copy"><svg data-feather="copy"></svg></button>
         </div>
       </div>
       <div class="info-row">
-        <span class="info-label">API Server</span>
+        <span class="info-label"><?= __('server.step3_api') ?></span>
         <div class="info-value copy-wrap">
           <code class="code-block" id="apiUrl"><?= htmlspecialchars($apiUrl) ?></code>
           <button class="copy-btn" data-copy="#apiUrl" title="Copy"><svg data-feather="copy"></svg></button>
         </div>
       </div>
       <?php else: ?>
-      <div class="alert alert-warning">Domain not configured. Set <code>DOMAIN</code> in .env</div>
+      <div class="alert alert-warning"><?= __('server.domain_not_configured') ?></div>
       <?php endif; ?>
     </div>
   </div>
@@ -93,12 +93,12 @@ page_open('Server Info');
   <div class="card-header">
     <div class="card-title">
       <svg data-feather="book-open"></svg>
-      Client Setup Instructions
+      <?= __('server.setup_guide') ?>
     </div>
   </div>
   <div class="card-body">
     <p style="font-size:var(--font-sm);color:var(--text-secondary);margin-bottom:20px">
-      Configure any RustDesk client to connect to this server by following these steps:
+      <?= __('server.setup_desc') ?>
     </p>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px">
@@ -106,52 +106,48 @@ page_open('Server Info');
       <div style="background:var(--surface-input);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:18px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
           <span style="background:var(--color-primary);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;flex-shrink:0">1</span>
-          <strong>Open Settings</strong>
+          <strong><?= __('server.step2_title') ?></strong>
         </div>
         <p style="font-size:var(--font-sm);color:var(--text-muted)">
-          In the RustDesk client, click the <strong>≡ menu</strong> → <strong>Settings</strong> → <strong>Network</strong> tab.
+          <?= __('server.step2_desc') ?>
         </p>
       </div>
 
       <div style="background:var(--surface-input);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:18px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
           <span style="background:var(--color-primary);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;flex-shrink:0">2</span>
-          <strong>Set Server Addresses</strong>
+          <strong><?= __('server.step3_title') ?></strong>
         </div>
         <p style="font-size:var(--font-sm);color:var(--text-muted)">
-          Set <strong>ID/Relay Server</strong> to <code style="color:var(--color-primary)"><?= htmlspecialchars($domain ?: 'your-server') ?></code><br/>
-          Set <strong>API Server</strong> to <code style="color:var(--color-primary)"><?= htmlspecialchars($apiUrl ?: $apiScheme . '://your-server' . $apiPort) ?></code>
+          Set <strong><?= __('server.step3_id_server') ?> / <?= __('server.step3_relay') ?></strong> to <code style="color:var(--color-primary)"><?= htmlspecialchars($domain ?: 'your-server') ?></code><br/>
+          Set <strong><?= __('server.step3_api') ?></strong> to <code style="color:var(--color-primary)"><?= htmlspecialchars($apiUrl ?: $apiScheme . '://your-server' . $apiPort) ?></code>
         </p>
       </div>
 
       <div style="background:var(--surface-input);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:18px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
           <span style="background:var(--color-primary);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;flex-shrink:0">3</span>
-          <strong>Set the Key</strong>
+          <strong><?= __('server.step3_key') ?></strong>
         </div>
         <p style="font-size:var(--font-sm);color:var(--text-muted)">
-          Paste the <strong>Public Key</strong> shown above into the <strong>Key</strong> field.
-          Leave blank if you skip key verification (less secure).
+          <?= __('server.step_key_desc') ?>
         </p>
       </div>
 
       <div style="background:var(--surface-input);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:18px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
           <span style="background:var(--color-primary);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;flex-shrink:0">4</span>
-          <strong>Login</strong>
+          <strong><?= __('server.step4_title') ?></strong>
         </div>
         <p style="font-size:var(--font-sm);color:var(--text-muted)">
-          Click <strong>Login</strong> in the top-right corner of the RustDesk main window
-          and use your account credentials. Address book and groups will then sync.
+          <?= __('server.step4_desc') ?>
         </p>
       </div>
 
     </div>
 
     <div class="alert alert-info" style="margin-top:20px">
-      <strong>Note:</strong> The device <em>initiating</em> a connection must be logged in — this is enforced
-      at the server level. The device being connected to does not need to be logged in. Login also enables
-      address book sync and group views.
+      <?= __('server.step4_warning') ?>
     </div>
   </div>
 </div>
@@ -161,22 +157,21 @@ page_open('Server Info');
   <div class="card-header">
     <div class="card-title">
       <svg data-feather="download"></svg>
-      Quick Client Config
+      <?= __('server.quick_config') ?>
     </div>
   </div>
   <div class="card-body">
     <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:20px">
-      Skip manual entry — download a ready-made config file or run the one-liner for your platform.
-      Close RustDesk before applying, then reopen it.
+      <?= __('server.quick_config_desc') ?>
     </p>
 
     <div style="margin-bottom:20px">
       <button class="btn btn-primary" onclick="downloadToml()" style="display:inline-flex;align-items:center;gap:6px">
         <svg data-feather="download" style="width:14px;height:14px"></svg>
-        Download RustDesk2.toml
+        <?= __('server.download_toml') ?>
       </button>
       <span style="font-size:var(--font-sm);color:var(--text-muted);margin-left:12px">
-        Works on Windows, Linux &amp; macOS — just drop it in the right folder (shown below).
+        <?= __('server.download_toml_desc') ?>
       </span>
     </div>
 
@@ -185,14 +180,14 @@ page_open('Server Info');
       <button class="qc-tab<?= $i === 0 ? ' qc-tab-active' : '' ?>"
               onclick="showTab('<?= strtolower($tab) ?>', this)"
               style="padding:6px 16px;font-size:var(--font-sm);background:none;border:none;border-bottom:2px solid <?= $i===0 ? 'var(--color-primary)' : 'transparent' ?>;color:<?= $i===0 ? 'var(--color-primary)' : 'var(--text-muted)' ?>;cursor:pointer;font-weight:<?= $i===0 ? '600' : '400' ?>">
-        <?= $tab ?>
+        <?= __('server.tab_' . strtolower($tab)) ?>
       </button>
       <?php endforeach; ?>
     </div>
 
     <div id="tab-windows">
       <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:8px">
-        Run in <strong>PowerShell</strong> (right-click → Run as Administrator not required unless RustDesk is installed system-wide):
+        <?= __('server.powershell_heading') ?>
       </p>
       <div class="copy-wrap" style="align-items:flex-start">
         <code class="code-block" id="ps1cmd" style="white-space:pre-wrap;font-size:0.72rem;line-height:1.6"><?= htmlspecialchars(
@@ -212,13 +207,13 @@ page_open('Server Info');
         </button>
       </div>
       <p style="font-size:0.72rem;color:var(--text-muted);margin-top:8px">
-        Config file location: <code>%APPDATA%\RustDesk\config\RustDesk2.toml</code>
+        <?= __('server.config_location_windows') ?>
       </p>
     </div>
 
     <div id="tab-linux" style="display:none">
       <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:8px">
-        Run in a terminal:
+        <?= __('server.terminal_heading') ?>
       </p>
       <div class="copy-wrap" style="align-items:flex-start">
         <code class="code-block" id="bashcmd" style="white-space:pre-wrap;font-size:0.72rem;line-height:1.6"><?= htmlspecialchars(
@@ -236,13 +231,13 @@ page_open('Server Info');
         </button>
       </div>
       <p style="font-size:0.72rem;color:var(--text-muted);margin-top:8px">
-        Config file location: <code>~/.config/rustdesk/RustDesk2.toml</code>
+        <?= __('server.config_location_linux') ?>
       </p>
     </div>
 
     <div id="tab-macos" style="display:none">
       <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:8px">
-        Run in Terminal:
+        <?= __('server.terminal_heading') ?>
       </p>
       <div class="copy-wrap" style="align-items:flex-start">
         <code class="code-block" id="maccmd" style="white-space:pre-wrap;font-size:0.72rem;line-height:1.6"><?= htmlspecialchars(
@@ -260,7 +255,7 @@ page_open('Server Info');
         </button>
       </div>
       <p style="font-size:0.72rem;color:var(--text-muted);margin-top:8px">
-        Config file location: <code>~/Library/Application Support/RustDesk/config/RustDesk2.toml</code>
+        <?= __('server.config_location_macos') ?>
       </p>
     </div>
   </div>
@@ -280,49 +275,45 @@ page_open('Server Info');
   <div class="card-header">
     <div class="card-title">
       <svg data-feather="package"></svg>
-      Pre-configured Client Filename
+      <?= __('server.preconfigured_title') ?>
     </div>
   </div>
   <div class="card-body">
     <p style="font-size:var(--font-sm);color:var(--text-secondary);margin-bottom:16px">
-      RustDesk supports embedding server config directly into the client filename.
-      Download the standard RustDesk installer, rename it using the string below, and distribute it —
-      opening or installing it will automatically apply your server settings.
-      No manual configuration required for your users.
+      <?= __('server.preconfigured_desc') ?>
     </p>
     <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:12px">
-      Rename the downloaded installer to match your platform:
+      <?= __('server.preconfigured_rename') ?>
     </p>
     <div style="display:grid;gap:8px;margin-bottom:16px">
       <div>
-        <span style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:4px">Windows (.exe)</span>
+        <span style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:4px"><?= __('server.platform_windows') ?></span>
         <div class="copy-wrap">
           <code class="code-block" id="cfgFilenameWin">rustdesk-<?= htmlspecialchars($cfgString) ?>.exe</code>
           <button class="copy-btn" data-copy="#cfgFilenameWin" title="Copy"><svg data-feather="copy"></svg></button>
         </div>
       </div>
       <div>
-        <span style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:4px">Linux (.AppImage)</span>
+        <span style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:4px"><?= __('server.platform_linux') ?></span>
         <div class="copy-wrap">
           <code class="code-block" id="cfgFilenameLinux">rustdesk-<?= htmlspecialchars($cfgString) ?>.AppImage</code>
           <button class="copy-btn" data-copy="#cfgFilenameLinux" title="Copy"><svg data-feather="copy"></svg></button>
         </div>
       </div>
       <div>
-        <span style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:4px">macOS — use the import string below instead (app bundle renaming is unreliable)</span>
+        <span style="font-size:0.7rem;color:var(--text-muted);display:block;margin-bottom:4px"><?= __('server.platform_macos') ?></span>
       </div>
     </div>
     <p style="font-size:var(--font-sm);color:var(--text-muted);margin-bottom:4px">
-      Universal: paste the config string into <strong>RustDesk → Network → ID/Relay Server → Import</strong> on any platform:
+      <?= __('server.universal_import') ?>
     </p>
     <div class="copy-wrap">
       <code class="code-block" id="cfgString"><?= htmlspecialchars($cfgString) ?></code>
-      <button class="copy-btn" data-copy="#cfgString" title="Copy string"><svg data-feather="copy"></svg></button>
+      <button class="copy-btn" data-copy="#cfgString" title="<?= __('general.copy') ?>"><svg data-feather="copy"></svg></button>
     </div>
     <!-- config string algorithm credit: devastgh (github.com/devastgh) -->
     <p style="font-size:0.72rem;color:var(--text-muted);margin-top:12px">
-      <strong>Note:</strong> The relay field is intentionally left blank — when host and relay are the same server,
-      RustDesk auto-detects the relay.
+      <strong><?= __('server.relay_note_title') ?></strong> <?= __('server.relay_note') ?>
     </p>
   </div>
 </div>
@@ -332,32 +323,32 @@ page_open('Server Info');
   <div class="card-header">
     <div class="card-title">
       <svg data-feather="shield"></svg>
-      Required Firewall Ports
+      <?= __('server.firewall_title') ?>
     </div>
   </div>
   <div class="card-body">
     <table style="width:100%;border-collapse:collapse;font-size:var(--font-sm)">
       <thead>
         <tr style="border-bottom:1px solid var(--border-color)">
-          <th style="text-align:left;padding:6px 12px;color:var(--text-muted);font-weight:500">Port</th>
-          <th style="text-align:left;padding:6px 12px;color:var(--text-muted);font-weight:500">Protocol</th>
-          <th style="text-align:left;padding:6px 12px;color:var(--text-muted);font-weight:500">Purpose</th>
+          <th style="text-align:left;padding:6px 12px;color:var(--text-muted);font-weight:500"><?= __('server.firewall_port') ?></th>
+          <th style="text-align:left;padding:6px 12px;color:var(--text-muted);font-weight:500"><?= __('server.firewall_protocol') ?></th>
+          <th style="text-align:left;padding:6px 12px;color:var(--text-muted);font-weight:500"><?= __('server.firewall_purpose') ?></th>
         </tr>
       </thead>
       <tbody>
         <?php
         $ports = [
-            ['21115', 'TCP',     'NAT type test'],
-            ['21116', 'TCP/UDP', 'Rendezvous (hbbs) — ID registration &amp; hole punching'],
-            ['21117', 'TCP',     'Relay (hbbr) — fallback traffic when P2P fails'],
-            ['21118', 'TCP',     'WebSocket rendezvous (browser clients)'],
-            ['21119', 'TCP',     'WebSocket relay (browser clients)'],
+            ['21115', 'TCP',     __('server.nat_test')],
+            ['21116', 'TCP/UDP', __('server.rendezvous_desc')],
+            ['21117', 'TCP',     __('server.relay_desc')],
+            ['21118', 'TCP',     __('server.ws_rendezvous')],
+            ['21119', 'TCP',     __('server.ws_relay')],
         ];
         if ($isIp) {
-            array_unshift($ports, ['21114', 'TCP', 'API Server (direct access — no reverse proxy)']);
-            $ports[] = [(string)$dashPort, 'TCP', 'Dashboard (your configured port)'];
+            array_unshift($ports, ['21114', 'TCP', __('server.firewall_port_direct')]);
+            $ports[] = [(string)$dashPort, 'TCP', __('server.firewall_port_dash')];
         } else {
-            $ports[] = ['443', 'TCP', 'API &amp; Dashboard (via Nginx Proxy Manager)'];
+            $ports[] = ['443', 'TCP', __('server.api_dash')];
         }
         foreach ($ports as [$port, $proto, $desc]): ?>
         <tr style="border-bottom:1px solid var(--border-color)">
@@ -369,12 +360,7 @@ page_open('Server Info');
       </tbody>
     </table>
     <p style="font-size:var(--font-sm);color:var(--text-muted);margin:12px 0 0">
-      <?php if ($isIp): ?>
-        All ports must be reachable by clients. Open them on the server firewall and any upstream router or hosting panel.
-      <?php else: ?>
-        All RustDesk ports must be open on the VPS firewall. Port 443 is handled by Nginx Proxy Manager — the API
-        and dashboard containers do not need direct public exposure.
-      <?php endif; ?>
+      <?= __('server.firewall_note') ?>
     </p>
   </div>
 </div>
@@ -383,50 +369,47 @@ page_open('Server Info');
   <div class="card-header">
     <div class="card-title">
       <svg data-feather="shield"></svg>
-      Security Notes
+      <?= __('server.security_title') ?>
     </div>
   </div>
   <div class="card-body">
     <div style="display:grid;gap:12px;font-size:var(--font-sm)">
       <div class="info-row">
-        <span class="info-label">Key Check</span>
+        <span class="info-label"><?= __('server.security_key_check') ?></span>
         <div class="info-value">
-          <span class="badge badge-info">Patched</span>
+          <span class="badge badge-info"><?= __('server.security_key_check') ?></span>
           <span style="color:var(--text-muted);margin-left:8px">
-            Standard RustDesk binaries embed a hardcoded key that never matches a custom server.
-            The key check is bypassed — auth is handled by JWT login instead.
+            <?= __('server.security_key_check_desc') ?>
           </span>
         </div>
       </div>
       <div class="info-row">
-        <span class="info-label">Transport</span>
+        <span class="info-label"><?= __('server.security_transport') ?></span>
         <div class="info-value">
           <?php if ($isIp): ?>
           <span class="badge badge-warning">HTTP</span>
-          <span style="color:var(--text-muted);margin-left:8px">API is unencrypted (direct IP). For production use, place behind a reverse proxy with TLS.</span>
+          <span style="color:var(--text-muted);margin-left:8px"><?= __('server.security_transport_http') ?></span>
           <?php else: ?>
           <span class="badge badge-active">HTTPS</span>
-          <span style="color:var(--text-muted);margin-left:8px">API protected by TLS via Nginx Proxy Manager.</span>
+          <span style="color:var(--text-muted);margin-left:8px"><?= __('server.security_transport_https') ?></span>
           <?php endif; ?>
         </div>
       </div>
       <div class="info-row">
-        <span class="info-label">End-to-End</span>
+        <span class="info-label"><?= __('server.security_e2e') ?></span>
         <div class="info-value">
           <span class="badge badge-active">Active</span>
           <span style="color:var(--text-muted);margin-left:8px">
-            Peer-to-peer sessions use RustDesk's built-in E2E encryption — the server never sees session content.
+            <?= __('server.security_e2e_desc') ?>
           </span>
         </div>
       </div>
       <div class="info-row">
-        <span class="info-label">Relay Auth</span>
+        <span class="info-label"><?= __('server.security_relay_auth') ?></span>
         <div class="info-value">
           <span class="badge badge-active">Active</span>
           <span style="color:var(--text-muted);margin-left:8px">
-            JWT token validated server-side in patched hbbs. Connections from clients without a valid
-            login token are rejected at the rendezvous layer before any relay bandwidth is used.
-            Only the initiating side must be logged in — the callee does not need to be.
+            <?= __('server.security_relay_auth_desc') ?>
           </span>
         </div>
       </div>
@@ -438,44 +421,42 @@ page_open('Server Info');
   <div class="card-header">
     <div class="card-title">
       <svg data-feather="grid"></svg>
-      Client Configuration Matrix
+      <?= __('server.matrix_title') ?>
     </div>
   </div>
   <div class="card-body" style="font-size:var(--font-sm)">
     <p style="color:var(--text-muted);margin:0 0 12px">
-      Not every machine needs the same configuration. Verified against the patched <code>hbbs</code> source.
-      <strong>Peer-to-peer session content is always E2E encrypted</strong> regardless — the key only affects
-      the rendezvous metadata channel.
+      <?= __('server.matrix_desc') ?>
     </p>
     <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:var(--font-sm)">
         <thead>
           <tr style="border-bottom:1px solid var(--border)">
-            <th style="text-align:center;padding:6px 8px;color:var(--text-muted);font-weight:600" colspan="3">Caller (initiating machine)</th>
-            <th style="text-align:center;padding:6px 8px;color:var(--text-muted);font-weight:600" colspan="3">Callee (machine being controlled)</th>
-            <th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-weight:600">Result</th>
+            <th style="text-align:center;padding:6px 8px;color:var(--text-muted);font-weight:600" colspan="3"><?= __('server.matrix_header_caller') ?></th>
+            <th style="text-align:center;padding:6px 8px;color:var(--text-muted);font-weight:600" colspan="3"><?= __('server.matrix_header_callee') ?></th>
+            <th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-weight:600"><?= __('server.matrix_header_result') ?></th>
           </tr>
           <tr style="border-bottom:1px solid var(--border)">
-            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500">Server</th>
-            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500">Login</th>
-            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500">Key</th>
-            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500">Server</th>
-            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500">Login</th>
-            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500">Key</th>
+            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500"><?= __('server.matrix_header_server') ?></th>
+            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500"><?= __('server.matrix_header_login') ?></th>
+            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500"><?= __('server.matrix_header_key') ?></th>
+            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500"><?= __('server.matrix_header_server') ?></th>
+            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500"><?= __('server.matrix_header_login') ?></th>
+            <th style="text-align:center;padding:4px 8px;color:var(--text-muted);font-weight:500"><?= __('server.matrix_header_key') ?></th>
             <th style="padding:4px 8px"></th>
           </tr>
         </thead>
         <tbody>
           <?php
           $rows = [
-            ['✅','✅','✅','✅','—','✅','✅ Works — both rendezvous channels encrypted'],
-            ['✅','✅','✅','✅','—','❌','✅ Works — caller encrypted, callee plaintext rendezvous'],
-            ['✅','✅','❌','✅','—','✅','✅ Works — callee encrypted, caller plaintext rendezvous'],
-            ['✅','✅','❌','✅','—','❌','✅ Works — both rendezvous channels plaintext'],
-            ['✅','❌','✅','✅','—','✅','❌ Blocked — caller not logged in, rejected at rendezvous'],
-            ['✅','❌','❌','✅','—','✅','❌ Blocked — caller not logged in, rejected at rendezvous'],
-            ['✅','✅','✅','❌','—','—','❌ Blocked — callee not registered, appears offline'],
-            ['❌','—','—','✅','—','✅','❌ Blocked — caller cannot reach rendezvous server'],
+            ['✅','✅','✅','✅','—','✅',__('server.matrix_row_works_both_encrypted')],
+            ['✅','✅','✅','✅','—','❌',__('server.matrix_row_caller_encrypted_callee_plain')],
+            ['✅','✅','❌','✅','—','✅',__('server.matrix_row_callee_encrypted_caller_plain')],
+            ['✅','✅','❌','✅','—','❌',__('server.matrix_row_both_plain')],
+            ['✅','❌','✅','✅','—','✅',__('server.matrix_row_caller_not_logged')],
+            ['✅','❌','❌','✅','—','✅',__('server.matrix_row_caller_not_logged')],
+            ['✅','✅','✅','❌','—','—',__('server.matrix_row_callee_not_registered')],
+            ['❌','—','—','✅','—','✅',__('server.matrix_row_caller_no_server')],
           ];
           foreach ($rows as $i => $r):
             $bg = $i % 2 === 0 ? 'background:var(--surface-alt,rgba(0,0,0,.03))' : '';
@@ -492,9 +473,9 @@ page_open('Server Info');
       </table>
     </div>
     <p style="color:var(--text-muted);margin:12px 0 0">
-      <strong>—</strong> = not applicable / has no effect &nbsp;|&nbsp;
-      <strong>Login</strong> = logged in to SkonaDesk API via RustDesk client &nbsp;|&nbsp;
-      <strong>Key</strong> = server public key configured in RustDesk Network settings
+      <?= __('server.matrix_legend_not_applicable') ?> &nbsp;|&nbsp;
+      <?= __('server.matrix_legend_login') ?> &nbsp;|&nbsp;
+      <?= __('server.matrix_legend_key') ?>
     </p>
   </div>
 </div>
@@ -503,41 +484,36 @@ page_open('Server Info');
   <div class="card-header">
     <div class="card-title">
       <svg data-feather="alert-triangle"></svg>
-      Troubleshooting
+      <?= __('server.troubleshooting_title') ?>
     </div>
   </div>
   <div class="card-body" style="display:grid;gap:16px;font-size:var(--font-sm)">
     <div>
-      <strong>Key mismatch</strong>
+      <strong><?= __('server.trouble_key_mismatch') ?></strong>
       <p style="color:var(--text-muted);margin:4px 0 0">
-        Two common causes: <strong>(1) The initiating client is not logged in</strong> — log in via the account
-        icon in RustDesk and try again. <strong>(2) The server key changed</strong> (e.g. after a volume wipe)
-        — clear the RustDesk client settings (<em>Network → reset</em>), re-enter the server details and key
-        from this page, then reconnect.
+        <?= __('server.trouble_key_mismatch_desc') ?>
       </p>
     </div>
     <div>
-      <strong>Failed to secure TCP / Device offline when logged in</strong>
+      <strong><?= __('server.trouble_secure_tcp') ?></strong>
       <p style="color:var(--text-muted);margin:4px 0 0">
-        This is the bug SkonaDesk was built to fix. If you are seeing it, the hbbs container may be running
-        the unpatched <code>rustdesk/rustdesk-server</code> image rather than <code>skonadesk-hbbs</code>.
-        Check the Server Addresses card above for the running image.
+        <?= __('server.trouble_secure_tcp_desc') ?>
       </p>
     </div>
     <div>
-      <strong>Address book / groups not syncing</strong>
+      <strong><?= __('server.trouble_sync') ?></strong>
       <p style="color:var(--text-muted);margin:4px 0 0">
-        The RustDesk client must be able to reach the API at
-        <?php if ($apiUrl): ?><code><?= htmlspecialchars($apiUrl) ?></code>.<?php endif; ?>
-        Check that Nginx Proxy Manager has a proxy host pointing your domain → <code>skonadesk-api:21114</code>
-        with a valid SSL certificate.
+        <?php if (!$isIp): ?>
+          <?= __('server.trouble_sync_desc_ssl', $apiUrl) ?>
+        <?php else: ?>
+          <?= __('server.trouble_sync_desc_http') ?>
+        <?php endif; ?>
       </p>
     </div>
     <div>
-      <strong>Can connect on LAN but not remotely</strong>
+      <strong><?= __('server.trouble_lan') ?></strong>
       <p style="color:var(--text-muted);margin:4px 0 0">
-        Ports 21115–21119 are not open on the VPS firewall or hosting control panel. Check all five ports
-        in the table above — both TCP and UDP on 21116.
+        <?= __('server.trouble_lan_desc') ?>
       </p>
     </div>
     <div>

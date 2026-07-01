@@ -4,11 +4,15 @@
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/api.php';
+require_once __DIR__ . '/../includes/LanguageService.php';
 
 session_init();
 header('Content-Type: text/html; charset=utf-8');
 
 if (!is_logged_in()) { echo ''; exit; }
+
+$langCode = get_effective_language();
+LanguageService::init($langCode);
 
 $resp     = api_get('/sessions');
 $sessions = $resp['data'] ?? [];
@@ -42,13 +46,13 @@ function ajax_type_badge(?int $type): string {
     switch ($type) {
         case 1:
             return '<span class="badge" style="font-size:0.7rem;background:rgba(99,102,241,0.15);color:#818cf8;border:1px solid rgba(99,102,241,0.3)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>File</span>';
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>' . __('sessions.type_file') . '</span>';
         case 2:
             return '<span class="badge" style="font-size:0.7rem;background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Port Fwd</span>';
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>' . __('sessions.type_port_fwd') . '</span>';
         default:
             return '<span class="badge" style="font-size:0.7rem;background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Remote</span>';
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' . __('sessions.type_remote') . '</span>';
     }
 }
 
@@ -70,13 +74,13 @@ function ajax_duration(string $ts, DateTime $now): string {
   <div style="display:flex;align-items:center;gap:12px">
     <span class="badge badge-online" style="font-size:0.8rem;padding:4px 10px">
       <span class="dot dot-green"></span>
-      <?= count($sessions) ?> active
+      <?= sprintf(__('sessions.count_active'), count($sessions)) ?>
     </span>
-    <span style="font-size:0.8rem;color:var(--text-muted)">Auto-refreshes every 5 seconds</span>
+    <span style="font-size:0.8rem;color:var(--text-muted)"><?= __('sessions.auto_refresh') ?></span>
   </div>
   <button class="btn btn-ghost btn-sm" onclick="refreshSessions()">
     <svg data-feather="refresh-cw" style="width:14px;height:14px"></svg>
-    Refresh now
+    <?= __('sessions.refresh_now') ?>
   </button>
 </div>
 
@@ -84,8 +88,8 @@ function ajax_duration(string $ts, DateTime $now): string {
 <div class="card">
   <div class="empty-state" style="padding:60px">
     <svg data-feather="cast" style="width:48px;height:48px;opacity:.3"></svg>
-    <p style="margin-top:16px;color:var(--text-muted)">No active sessions right now</p>
-    <p style="font-size:0.8rem;color:var(--text-muted)">Sessions appear here while remote connections are in progress</p>
+    <p style="margin-top:16px;color:var(--text-muted)"><?= __('sessions.empty_title') ?></p>
+    <p style="font-size:0.8rem;color:var(--text-muted)"><?= __('sessions.empty_desc') ?></p>
   </div>
 </div>
 <?php else: ?>
@@ -94,36 +98,36 @@ function ajax_duration(string $ts, DateTime $now): string {
     <table id="sessionsTable">
       <thead>
         <tr>
-          <th style="width:80px">Status</th>
-          <th style="width:90px">Type</th>
-          <th>Controlling (Caller)</th>
+          <th style="width:80px"><?= __('sessions.status') ?></th>
+          <th style="width:90px"><?= __('sessions.type') ?></th>
+          <th><?= __('sessions.caller') ?></th>
           <th style="text-align:center;width:40px"></th>
-          <th>Target Device</th>
-          <th>Target User</th>
-          <th>Duration</th>
-          <th>Caller IP</th>
+          <th><?= __('sessions.target') ?></th>
+          <th><?= __('sessions.target_user') ?></th>
+          <th><?= __('sessions.duration') ?></th>
+          <th><?= __('sessions.caller_ip') ?></th>
         </tr>
       </thead>
       <tbody>
         <?php foreach ($sessions as $s):
-            $callerIp   = htmlspecialchars($s['caller_wan_ip'] ?? '');
-            $callerOs   = $s['caller_os']   ?? '';
-            $callerId   = htmlspecialchars($s['caller_id']    ?? '');
-            $rawName    = $s['caller_name'] ?? '';
-            $callerName = $rawName ? htmlspecialchars($rawName) : ($callerIp ?: '—');
-            $targetName = htmlspecialchars($s['target_name']  ?? $s['target_id'] ?? '—');
-            $targetId   = htmlspecialchars($s['target_id']    ?? '');
-            $targetOs   = $s['target_os']   ?? '';
-            $targetUser = htmlspecialchars($s['target_user']  ?? '');
-            $since      = $s['connected_since'] ?? '';
-            $duration   = ajax_duration($since, $now);
-            $sinceStr   = $since ? htmlspecialchars(substr($since, 0, 16)) : '—';
-            $connType   = isset($s['conn_type']) && $s['conn_type'] !== null ? (int)$s['conn_type'] : null;
+            $callerIp    = htmlspecialchars($s['caller_wan_ip'] ?? '');
+            $callerOs    = $s['caller_os']   ?? '';
+            $callerId    = htmlspecialchars($s['caller_id']    ?? '');
+            $rawName     = $s['caller_name'] ?? '';
+            $callerName  = $rawName ? htmlspecialchars($rawName) : ($callerIp ?: '—');
+            $targetName  = htmlspecialchars($s['target_name']  ?? $s['target_id'] ?? '—');
+            $targetId    = htmlspecialchars($s['target_id']    ?? '');
+            $targetOs    = $s['target_os']   ?? '';
+            $targetUser  = htmlspecialchars($s['target_user']  ?? '');
+            $since       = $s['connected_since'] ?? '';
+            $duration    = ajax_duration($since, $now);
+            $sinceStr    = $since ? htmlspecialchars(substr($since, 0, 16)) : '—';
+            $connType    = isset($s['conn_type']) && $s['conn_type'] !== null ? (int)$s['conn_type'] : null;
         ?>
         <tr>
           <td>
             <span class="badge badge-online" style="font-size:0.72rem">
-              <span class="dot dot-green"></span>Live
+              <span class="dot dot-green"></span><?= __('sessions.live') ?>
             </span>
           </td>
           <td><?= ajax_type_badge($connType) ?></td>

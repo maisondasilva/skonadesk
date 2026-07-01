@@ -23,13 +23,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $groupIds = array_filter(array_map('intval', (array)($_POST['group_ids'] ?? [])));
         $note     = $_POST['note'] ?? '';
         $resp = api_put("/peers/$id", ['group_ids' => array_values($groupIds), 'note' => $note]);
-        $flash = api_ok($resp) ? "Device updated." : api_error($resp);
+        $flash = api_ok($resp) ? __('devices.device_updated') : api_error($resp);
         if (!api_ok($resp)) $flashType = 'danger';
 
     } elseif ($action === 'delete' && $user['is_admin']) {
         $id = $_POST['peer_id'] ?? '';
         $resp = api_delete("/peers/$id");
-        $flash = api_ok($resp) ? "Device removed." : api_error($resp);
+        $flash = api_ok($resp) ? __('devices.device_removed') : api_error($resp);
         if (!api_ok($resp)) $flashType = 'danger';
     }
 }
@@ -120,7 +120,7 @@ function format_version(string $ver): string {
     return htmlspecialchars($ver);
 }
 
-page_open('Devices');
+page_open(__('devices.title'));
 ?>
 
 <style>
@@ -175,7 +175,7 @@ page_open('Devices');
 
 <div class="section-header">
   <h2>
-    <?= $total ?> Device<?= $total !== 1 ? 's' : '' ?>
+    <?= sprintf(__p('devices.count', $total), $total) ?>
     <?php if ($filterGroupName): ?>
       <span style="font-size:0.75rem;font-weight:400;margin-left:8px;padding:2px 10px;background:var(--color-primary);color:#fff;border-radius:12px">
         <?= htmlspecialchars($filterGroupName) ?>
@@ -186,10 +186,10 @@ page_open('Devices');
     <?php if ($filterGroupId): ?>
     <a href="/devices.php" class="btn btn-ghost" style="font-size:0.8rem;padding:4px 12px">
       <svg data-feather="x" style="width:13px;height:13px"></svg>
-      Clear filter
+      <?= __('devices.clear_filter') ?>
     </a>
     <?php endif; ?>
-    <span style="font-size:var(--font-sm);color:var(--text-muted)">Auto-registered via heartbeat</span>
+    <span style="font-size:var(--font-sm);color:var(--text-muted)"><?= __('devices.auto_registered') ?></span>
   </div>
 </div>
 
@@ -198,20 +198,20 @@ page_open('Devices');
     <?php if (empty($devices)): ?>
     <div class="empty-state">
       <svg data-feather="monitor"></svg>
-      <h3>No devices yet</h3>
-      <p>Devices appear here once they connect and send a heartbeat.</p>
+      <h3><?= __('devices.no_devices_title') ?></h3>
+      <p><?= __('devices.no_devices_desc') ?></p>
     </div>
     <?php else: ?>
     <table>
       <thead>
         <tr>
-          <th>Status</th>
-          <th>Device</th>
-          <th style="text-align:center">OS</th>
-          <th>User</th>
-          <th>Groups</th>
-          <th>Last Seen</th>
-          <th>Version</th>
+          <th><?= __('devices.status') ?></th>
+          <th><?= __('devices.device') ?></th>
+          <th style="text-align:center"><?= __('devices.os') ?></th>
+          <th><?= __('devices.user') ?></th>
+          <th><?= __('devices.groups') ?></th>
+          <th><?= __('devices.last_seen') ?></th>
+          <th><?= __('devices.version') ?></th>
           <?php if ($user['is_admin']): ?><th></th><?php endif; ?>
         </tr>
       </thead>
@@ -258,7 +258,7 @@ page_open('Devices');
           <?php if ($user['is_admin']): ?>
           <td>
             <div style="display:flex;gap:4px">
-              <button class="btn-icon" title="Edit device"
+              <button class="btn-icon" title="<?= __('devices.edit_device') ?>"
                 data-modal-open="editModal"
                 data-peer="<?= htmlspecialchars($id) ?>"
                 data-groups="<?= $groupsJson ?>"
@@ -270,7 +270,7 @@ page_open('Devices');
                 <input type="hidden" name="action"  value="delete" />
                 <input type="hidden" name="peer_id" value="<?= htmlspecialchars($id) ?>" />
                 <button class="btn-icon danger" type="submit"
-                  data-confirm="Remove device <?= htmlspecialchars($id) ?>?">
+                  data-confirm="<?= htmlspecialchars(sprintf(__('devices.confirm_remove'), $id)) ?>">
                   <svg data-feather="trash-2"></svg>
                 </button>
               </form>
@@ -283,8 +283,8 @@ page_open('Devices');
           <td colspan="<?= $user['is_admin'] ? 8 : 7 ?>">
             <div class="device-sub-inner">
               <div class="si">
-                <span class="si-label">ID</span>
-                <span class="device-id-mono" title="Click to copy" onclick="navigator.clipboard.writeText('<?= htmlspecialchars($id) ?>');this.textContent='Copied!';setTimeout(()=>this.textContent='<?= htmlspecialchars($id) ?>',1500)"><?= htmlspecialchars($id) ?></span>
+                <span class="si-label"><?= __('devices.id') ?></span>
+                <span class="device-id-mono" title="<?= __('devices.click_to_copy') ?>" onclick="navigator.clipboard.writeText('<?= htmlspecialchars($id) ?>');this.textContent='<?= htmlspecialchars(__('devices.copied'), ENT_QUOTES) ?>';setTimeout(()=>this.textContent='<?= htmlspecialchars($id) ?>',1500)"><?= htmlspecialchars($id) ?></span>
               </div>
               <?php if ($cpu): ?>
               <div class="si">
@@ -295,7 +295,7 @@ page_open('Devices');
               <?php if ($memory): ?>
               <div class="si">
                 <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5"><path d="M6 19v-3M10 19v-3M14 19v-3M18 19v-3M8 11V9M16 11V9M12 11V9M2 15h20M2 7l10-4 10 4"/></svg>
-                <span><?= htmlspecialchars($memory) ?> RAM</span>
+                <span><?= htmlspecialchars($memory) ?> <?= __('devices.ram') ?></span>
               </div>
               <?php endif; ?>
               <?php if ($wanIp): ?>
@@ -306,7 +306,7 @@ page_open('Devices');
               <?php endif; ?>
               <?php if ($os): ?>
               <div class="si">
-                <span class="si-label">OS</span>
+                <span class="si-label"><?= __('devices.os') ?></span>
                 <span><?= htmlspecialchars($os) ?></span>
               </div>
               <?php endif; ?>
@@ -321,7 +321,7 @@ page_open('Devices');
   </div>
   <?php if ($pages > 1): ?>
   <div class="pagination">
-    <span class="page-info">Page <?= $page ?> of <?= $pages ?> (<?= $total ?> total)</span>
+    <span class="page-info"><?= __('devices.page', $page, $pages, $total) ?></span>
     <?php
     $pgBase = $filterGroupId ? "?group_id=$filterGroupId&page=" : "?page=";
     for ($p = max(1,$page-2); $p <= min($pages,$page+2); $p++):
@@ -336,7 +336,7 @@ page_open('Devices');
 <div class="modal-backdrop" id="editModal">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Edit Device</span>
+      <span class="modal-title"><?= __('devices.edit_title') ?></span>
       <button class="modal-close" data-modal-close><svg data-feather="x"></svg></button>
     </div>
     <form method="POST">
@@ -344,14 +344,14 @@ page_open('Devices');
       <input type="hidden" name="peer_id" id="editPeerId" value="" />
       <div class="modal-body">
         <div class="form-group" style="margin-bottom:16px">
-          <label>Device ID</label>
+          <label><?= __('devices.device_id') ?></label>
           <input type="text" id="editPeerIdDisplay" readonly style="opacity:0.6" />
         </div>
         <div class="form-group" style="margin-bottom:16px">
-          <label>Device Groups</label>
+          <label><?= __('devices.device_groups') ?></label>
           <div id="editGroupChecks" style="display:flex;flex-direction:column;gap:6px;max-height:140px;overflow-y:auto;padding:8px 10px;background:var(--surface-alt,rgba(0,0,0,.05));border-radius:6px">
             <?php if (empty($groupList)): ?>
-            <span style="font-size:0.8rem;color:var(--text-muted)">No groups defined yet.</span>
+            <span style="font-size:0.8rem;color:var(--text-muted)"><?= __('devices.no_groups') ?></span>
             <?php else: ?>
             <?php foreach ($groupList as $g): ?>
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;font-weight:normal">
@@ -363,15 +363,15 @@ page_open('Devices');
           </div>
         </div>
         <div class="form-group">
-          <label for="editNote">Note</label>
-          <input type="text" name="note" id="editNote" placeholder="Optional note" />
+          <label for="editNote"><?= __('devices.note') ?></label>
+          <input type="text" name="note" id="editNote" placeholder="<?= __('devices.note_placeholder') ?>" />
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+        <button type="button" class="btn btn-ghost" data-modal-close><?= __('devices.cancel') ?></button>
         <button type="submit" class="btn btn-primary">
           <svg data-feather="save"></svg>
-          Save
+          <?= __('devices.save') ?>
         </button>
       </div>
     </form>

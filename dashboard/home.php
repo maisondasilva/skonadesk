@@ -22,38 +22,38 @@ $pubKey    = $info['public_key'] ?? '';
 $domain    = $info['domain']     ?? '';
 $recentLog = $recent['data']     ?? [];
 
-page_open('Dashboard');
+page_open(__('dashboard.title'));
 ?>
 
 <div class="stat-grid" id="statGrid">
   <div class="stat-card" data-accent="teal">
-    <div class="stat-label">Total Devices</div>
+    <div class="stat-label"><?= __('dashboard.total_devices') ?></div>
     <div class="stat-value" id="st-devices"><?= $totalDevices ?></div>
-    <div class="stat-sub">registered</div>
+    <div class="stat-sub"><?= __('dashboard.registered') ?></div>
     <svg class="stat-icon" data-feather="monitor"></svg>
   </div>
   <div class="stat-card" data-accent="green">
-    <div class="stat-label">Online Now</div>
+    <div class="stat-label"><?= __('dashboard.online_now') ?></div>
     <div class="stat-value" id="st-online"><?= $onlineDevices ?></div>
-    <div class="stat-sub">seen &lt; 2 min ago</div>
+    <div class="stat-sub"><?= __('dashboard.seen_recently') ?></div>
     <svg class="stat-icon" data-feather="wifi"></svg>
   </div>
   <div class="stat-card" data-accent="orange" style="cursor:pointer" onclick="window.location='/sessions.php'">
-    <div class="stat-label">Active Sessions</div>
+    <div class="stat-label"><?= __('dashboard.active_sessions') ?></div>
     <div class="stat-value" id="st-sessions"><?= $activeSessions ?></div>
-    <div class="stat-sub">live right now</div>
+    <div class="stat-sub"><?= __('dashboard.live_right_now') ?></div>
     <svg class="stat-icon" data-feather="cast"></svg>
   </div>
   <div class="stat-card" data-accent="purple">
-    <div class="stat-label">Total Users</div>
+    <div class="stat-label"><?= __('dashboard.total_users') ?></div>
     <div class="stat-value" id="st-users"><?= $totalUsers ?></div>
-    <div class="stat-sub">accounts</div>
+    <div class="stat-sub"><?= __('dashboard.accounts') ?></div>
     <svg class="stat-icon" data-feather="users"></svg>
   </div>
   <div class="stat-card" data-accent="blue">
-    <div class="stat-label">Connections</div>
+    <div class="stat-label"><?= __('dashboard.connections') ?></div>
     <div class="stat-value" id="st-conns"><?= $connsToday ?></div>
-    <div class="stat-sub">last 24 hours</div>
+    <div class="stat-sub"><?= __('dashboard.last_24h') ?></div>
     <svg class="stat-icon" data-feather="zap"></svg>
   </div>
 </div>
@@ -64,17 +64,17 @@ page_open('Dashboard');
     <div class="card-header">
       <div class="card-title">
         <svg data-feather="server"></svg>
-        Server Connection Info
+        <?= __('dashboard.server_info') ?>
       </div>
       <a href="/server.php" class="btn btn-ghost btn-sm">
         <svg data-feather="external-link"></svg>
-        Full details
+        <?= __('dashboard.full_details') ?>
       </a>
     </div>
     <div class="card-body">
       <?php if ($pubKey): ?>
       <div class="info-row">
-        <span class="info-label">Public Key</span>
+        <span class="info-label"><?= __('dashboard.public_key') ?></span>
         <div class="info-value copy-wrap">
           <code class="code-block" id="pubKeyShort"><?= htmlspecialchars($pubKey) ?></code>
           <button class="copy-btn" data-copy="#pubKeyShort" title="Copy key">
@@ -85,7 +85,7 @@ page_open('Dashboard');
       <?php endif; ?>
       <?php if ($domain): ?>
       <div class="info-row">
-        <span class="info-label">Rendezvous</span>
+        <span class="info-label"><?= __('dashboard.rendezvous') ?></span>
         <div class="info-value copy-wrap">
           <code class="code-block" id="hbbsAddr"><?= htmlspecialchars($domain) ?></code>
           <button class="copy-btn" data-copy="#hbbsAddr" title="Copy address">
@@ -94,7 +94,7 @@ page_open('Dashboard');
         </div>
       </div>
       <div class="info-row">
-        <span class="info-label">Relay</span>
+        <span class="info-label"><?= __('dashboard.relay') ?></span>
         <div class="info-value">
           <code class="code-block"><?= htmlspecialchars($domain) ?></code>
         </div>
@@ -107,27 +107,27 @@ page_open('Dashboard');
     <div class="card-header">
       <div class="card-title">
         <svg data-feather="activity"></svg>
-        Recent Activity
+        <?= __('dashboard.recent_activity') ?>
       </div>
       <a href="/audit.php" class="btn btn-ghost btn-sm">
         <svg data-feather="external-link"></svg>
-        View all
+        <?= __('dashboard.view_all') ?>
       </a>
     </div>
     <?php if (empty($recentLog)): ?>
     <div class="empty-state" style="padding:28px">
       <svg data-feather="inbox"></svg>
-      <p>No audit events yet</p>
+      <p><?= __('dashboard.no_events') ?></p>
     </div>
     <?php else: ?>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Time</th>
-            <th>Event</th>
-            <th>Device</th>
-            <th>Action</th>
+            <th><?= __('audit.time') ?></th>
+            <th><?= __('audit.type') ?></th>
+            <th><?= __('audit.device') ?></th>
+            <th><?= __('audit.action') ?></th>
           </tr>
         </thead>
         <tbody>

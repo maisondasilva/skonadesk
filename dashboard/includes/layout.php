@@ -3,16 +3,17 @@
 // Created by Mike Hayward — github.com/Skonamonkey
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/LanguageService.php';
 
 $_NAV = [
-    ['path' => '/home.php',         'icon' => 'grid',       'label' => 'Dashboard'],
-    ['path' => '/devices.php',      'icon' => 'monitor',    'label' => 'Devices'],
-    ['path' => '/sessions.php',     'icon' => 'cast',       'label' => 'Sessions'],
-    ['path' => '/addressbook.php',  'icon' => 'book',       'label' => 'Address Book'],
-    ['path' => '/users.php',        'icon' => 'users',      'label' => 'Users',   'admin' => true],
-    ['path' => '/groups.php',       'icon' => 'layers',     'label' => 'Groups',  'admin' => true],
-    ['path' => '/audit.php',        'icon' => 'activity',   'label' => 'Audit Log'],
-    ['path' => '/server.php',       'icon' => 'server',     'label' => 'Server'],
+    ['path' => '/home.php',         'icon' => 'grid',       'label' => 'nav.dashboard'],
+    ['path' => '/devices.php',      'icon' => 'monitor',    'label' => 'nav.devices'],
+    ['path' => '/sessions.php',     'icon' => 'cast',       'label' => 'nav.sessions'],
+    ['path' => '/addressbook.php',  'icon' => 'book',       'label' => 'nav.address_book'],
+    ['path' => '/users.php',        'icon' => 'users',      'label' => 'nav.users',    'admin' => true],
+    ['path' => '/groups.php',       'icon' => 'layers',     'label' => 'nav.groups',   'admin' => true],
+    ['path' => '/audit.php',        'icon' => 'activity',   'label' => 'nav.audit_log'],
+    ['path' => '/server.php',       'icon' => 'server',     'label' => 'nav.server'],
 ];
 
 function page_open(string $title, string $activeFile = ''): void {
@@ -22,8 +23,12 @@ function page_open(string $title, string $activeFile = ''): void {
     $isAdmin = $user['is_admin'];
     $active  = $activeFile ?: basename($_SERVER['PHP_SELF'] ?? '');
     $appName = APP_NAME;
+
+    // Initialise language
+    $langCode = get_effective_language();
+    LanguageService::init($langCode);
 ?><!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="<?= LanguageService::getCode() ?>" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -53,16 +58,24 @@ function page_open(string $title, string $activeFile = ''): void {
 ?>      <li class="nav-item<?= $isCurrent ? ' active' : '' ?>">
         <a href="<?= $item['path'] ?>" class="nav-link">
           <svg class="nav-icon" data-feather="<?= $item['icon'] ?>"></svg>
-          <span class="nav-label"><?= $item['label'] ?></span>
+          <span class="nav-label"><?= __($item['label']) ?></span>
         </a>
       </li>
 <?php endforeach; ?>
+<?php if ($isAdmin): ?>
+      <li class="nav-item<?= basename($active) === 'settings.php' ? ' active' : '' ?>">
+        <a href="/settings.php" class="nav-link">
+          <svg class="nav-icon" data-feather="settings"></svg>
+          <span class="nav-label"><?= __('nav.settings') ?></span>
+        </a>
+      </li>
+<?php endif; ?>
     </ul>
 
     <div class="sidebar-footer">
-      <button class="nav-link collapse-toggle" id="collapseBtn" title="Collapse sidebar">
+      <button class="nav-link collapse-toggle" id="collapseBtn" title="<?= __('nav.collapse') ?>">
         <svg data-feather="chevrons-left" class="nav-icon"></svg>
-        <span class="nav-label">Collapse</span>
+        <span class="nav-label"><?= __('nav.collapse') ?></span>
       </button>
     </div>
   </nav>
@@ -75,9 +88,9 @@ function page_open(string $title, string $activeFile = ''): void {
       <h1 class="topbar-title"><?= htmlspecialchars($title) ?></h1>
       <div class="topbar-user">
         <?php if ($isAdmin): ?>
-          <span class="badge badge-admin">Admin</span>
+          <span class="badge badge-admin"><?= __('users.admin') ?></span>
         <?php endif; ?>
-        <a href="/profile.php" class="topbar-logout" title="My Profile" style="<?= basename($active) === 'profile.php' ? 'color:var(--teal)' : '' ?>">
+        <a href="/profile.php" class="topbar-logout" title="<?= __('nav.my_profile') ?>" style="<?= basename($active) === 'profile.php' ? 'color:var(--teal)' : '' ?>">
           <span class="user-name"><?= htmlspecialchars($user['display_name'] ?: $user['username']) ?></span>
         </a>
         <a href="/logout.php" class="topbar-logout" title="Logout">

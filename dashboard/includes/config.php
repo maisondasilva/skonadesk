@@ -6,6 +6,7 @@ define('APP_NAME',       'SkonaDesk');
 define('APP_SECRET',     getenv('APP_SECRET')           ?: 'change_this_secret');
 define('DATA_PATH',      getenv('DATA_PATH')            ?: '/data');
 define('APP_VERSION',    '1.0.0');
+define('LANG_DIR',       __DIR__ . '/../lang');
 
 $_apiPublic = getenv('API_PUBLIC_URL');
 $_domain    = getenv('DOMAIN') ?: '';

@@ -4,6 +4,7 @@
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/api.php';
+require_once __DIR__ . '/includes/LanguageService.php';
 
 session_init();
 
@@ -12,6 +13,10 @@ if (is_logged_in()) {
     exit;
 }
 
+// Init language from cookie (if set) — user isn't logged in yet
+$langCode = get_effective_language();
+LanguageService::init($langCode);
+
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -19,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
 
     if ($username === '' || $password === '') {
-        $error = 'Please enter your username and password.';
+        $error = __('login.error_required');
     } else {
         $resp = api_post('/login', ['username' => $username, 'password' => $password]);
 
@@ -29,22 +34,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['display_name']  = $resp['user']['display_name'] ?? $username;
             $_SESSION['is_admin']      = !empty($resp['user']['is_admin']);
             $_SESSION['user_id']       = $resp['user']['id']           ?? 0;
+
+            // Set language from user preference, or keep cookie/session default
+            $userLang = $resp['user']['language'] ?? '';
+            if ($userLang) {
+                set_session_language($userLang);
+            } elseif (!empty($_COOKIE['skona_lang'])) {
+                set_session_language($_COOKIE['skona_lang']);
+            }
+
             header('Location: /home.php');
             exit;
         } else {
             $error = api_error($resp);
             if (str_contains($error, '401') || str_contains(strtolower($error), 'unauthori')) {
-                $error = 'Invalid username or password.';
+                $error = __('login.error_invalid');
             }
         }
     }
 }
 ?><!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="<?= LanguageService::getCode() ?>" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login | <?= APP_NAME ?></title>
+  <title><?= __('login.title') ?> | <?= APP_NAME ?></title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -60,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-brand">
       <img src="/assets/icon.png" alt="<?= APP_NAME ?>" />
       <h1><?= APP_NAME ?></h1>
-      <p>Remote Desktop Management</p>
+      <p><?= __('app.tagline') ?></p>
     </div>
 
     <?php if ($error): ?>
@@ -72,25 +86,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <form method="POST" class="login-form" autocomplete="on">
       <div class="form-group">
-        <label for="username">Username</label>
+        <label for="username"><?= __('login.username') ?></label>
         <input type="text" id="username" name="username" autocomplete="username"
                value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
-               placeholder="Enter username" required autofocus />
+               placeholder="<?= __('login.username') ?>" required autofocus />
       </div>
       <div class="form-group">
-        <label for="password">Password</label>
+        <label for="password"><?= __('login.password') ?></label>
         <input type="password" id="password" name="password" autocomplete="current-password"
-               placeholder="Enter password" required />
+               placeholder="<?= __('login.password') ?>" required />
       </div>
       <button type="submit" class="btn btn-primary">
         <svg data-feather="log-in"></svg>
-        Sign In
+        <?= __('login.sign_in') ?>
       </button>
     </form>
     <p style="font-size:0.65rem;color:var(--text-muted);text-align:center;margin-top:16px">
-      Built on <a href="https://rustdesk.com" target="_blank" rel="noopener"
+      <?= __('login.built_on') ?> <a href="https://rustdesk.com" target="_blank" rel="noopener"
         style="color:var(--text-muted);text-decoration:underline;text-underline-offset:2px">RustDesk</a>
-      open-source server &mdash; AGPL-3.0
+      <?= __('login.open_source') ?>
     </p>
   </div>
 </div>

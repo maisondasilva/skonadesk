@@ -39,6 +39,39 @@ function current_user(): array {
         'username'     => $_SESSION['username']     ?? '',
         'display_name' => $_SESSION['display_name'] ?? '',
         'is_admin'     => $_SESSION['is_admin']      ?? false,
+        'language'     => $_SESSION['language']      ?? '',
         'token'        => $_SESSION['access_token']  ?? '',
     ];
+}
+
+/**
+ * Get the effective language for the current user/session.
+ * Resolution order: session → cookie → 'en'
+ */
+function get_effective_language(): string {
+    session_init();
+
+    // Session preference (set at login or on language change)
+    $sessionLang = $_SESSION['language'] ?? '';
+    if ($sessionLang && is_readable(LANG_DIR . '/' . $sessionLang . '.json')) {
+        return $sessionLang;
+    }
+
+    // Cookie (for login page, persists across logouts)
+    $cookieLang = $_COOKIE['skona_lang'] ?? '';
+    if ($cookieLang && is_readable(LANG_DIR . '/' . $cookieLang . '.json')) {
+        return $cookieLang;
+    }
+
+    return 'en';
+}
+
+/**
+ * Set the session language from a user record's preference.
+ * Called on login and profile update.
+ */
+function set_session_language(string $lang): void {
+    $_SESSION['language'] = $lang;
+    // Also set a cookie so it persists across logouts
+    setcookie('skona_lang', $lang, time() + 86400 * 365, '/', '', false, true);
 }
