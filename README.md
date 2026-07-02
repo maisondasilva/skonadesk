@@ -15,6 +15,10 @@
   <a href="https://buymeacoffee.com/skonamonkey"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support%20this%20project-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee"></a>
 </p>
 
+<p align="center">
+  <a href="README.pt-BR.md">[Português (Brasil)]</a>
+</p>
+
 ---
 
 ## What is SkonaDesk?
