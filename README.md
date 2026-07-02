@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="README.pt-BR.md">Português (Brasil)</a>
+  [Português (Brasil)](README.pt-BR.md)
 </p>
 
 ---
