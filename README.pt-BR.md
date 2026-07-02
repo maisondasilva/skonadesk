@@ -92,12 +92,12 @@ O RustDesk Pro também é auto-hospedado - não é um serviço em nuvem. É um p
 ## Capturas de tela
 
 <p align="center">
-  <img src="docs/screenshots/dashboard.png" alt="Painel do SkonaDesk" width="80%" />
+  <img src="docs/screenshots/pt-BR/dashboard.png" alt="Painel do SkonaDesk" width="80%" />
   <br><em>Painel com estatísticas em tempo real, status dos dispositivos, sessões ativas e atividade recente</em>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/devices.png" alt="Página de dispositivos" width="80%" />
+  <img src="docs/screenshots/pt-BR/devices.png" alt="Página de dispositivos" width="80%" />
   <br><em>Gerenciamento de dispositivos - ícones de sistema operacional, versão do cliente, CPU, RAM e IP WAN em um só lugar</em>
 </p>
 
